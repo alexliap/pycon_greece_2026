@@ -12,8 +12,7 @@ Everything is pure Python and deterministic, so dragging a slider on stage
 always produces the same merges.
 """
 
-from __future__ import annotations
-
+import itertools
 import re
 from collections import Counter
 from dataclasses import dataclass
@@ -24,9 +23,15 @@ from functools import lru_cache
 # real tokenizers treat the leading space as part of the token.
 WORD_START = "▁"
 
+# A byte is 8 bits, so there are exactly 2**8 of them. Real tokenizers start
+# from that as their whole base vocabulary (IDs 0-255) and every merge takes the
+# next free ID. Starting from bytes is why there is no such thing as an unknown
+# word: any text that can exist can be written as bytes.
+BASE_VOCAB_SIZE = 256
+
 _WORD_RE = re.compile(r"\S+")
 
-MAX_MERGES = 150
+MAX_MERGES = 15
 
 
 @dataclass(frozen=True)
@@ -38,6 +43,11 @@ class Merge:
     count: int
     token: str
 
+    @property
+    def token_id(self) -> int:
+        """Merged tokens take the next free ID after the 256 byte values."""
+        return BASE_VOCAB_SIZE + self.rank
+
 
 @dataclass(frozen=True)
 class BPEModel:
@@ -48,8 +58,18 @@ class BPEModel:
 
     @property
     def vocab(self) -> tuple[str, ...]:
-        """Base characters plus every merged token."""
+        """The symbols this corpus actually uses, plus every merged token."""
         return self.base_alphabet + tuple(m.token for m in self.merges)
+
+    @property
+    def vocab_size(self) -> int:
+        """What a real tokenizer would report: all 256 bytes plus the merges.
+
+        Bigger than ``len(vocab)`` on purpose. A real tokenizer carries every
+        byte value whether or not this particular corpus used it, which is
+        exactly what makes unknown text impossible.
+        """
+        return BASE_VOCAB_SIZE + len(self.merges)
 
     def take(self, n: int) -> "BPEModel":
         """The same model as it looked after only ``n`` merges."""
@@ -64,7 +84,9 @@ class BPEModel:
 
     def encode(self, text: str) -> list[str]:
         """Tokenize arbitrary text with the learned merges."""
-        return [tok for word in _WORD_RE.findall(text) for tok in self.encode_word(word)]
+        return [
+            tok for word in _WORD_RE.findall(text) for tok in self.encode_word(word)
+        ]
 
 
 def _split_word(word: str) -> list[str]:
@@ -91,7 +113,7 @@ def _count_pairs(words: dict[tuple[str, ...], int]) -> Counter[tuple[str, str]]:
     """Count adjacent symbol pairs, weighted by how often each word appears."""
     pairs: Counter[tuple[str, str]] = Counter()
     for symbols, freq in words.items():
-        for left, right in zip(symbols, symbols[1:]):
+        for left, right in itertools.pairwise(symbols):
             pairs[(left, right)] += freq
     return pairs
 
@@ -115,7 +137,9 @@ def train(corpus: str, num_merges: int = MAX_MERGES) -> BPEModel:
             break
         # max() over (count, pair) keeps ties deterministic instead of relying
         # on dict ordering.
-        (best_pair, best_count) = max(pairs.items(), key=lambda item: (item[1], item[0]))
+        (best_pair, best_count) = max(
+            pairs.items(), key=lambda item: (item[1], item[0])
+        )
         if best_count < 2:
             break
         merges.append(
@@ -140,17 +164,31 @@ def train_history(corpus: str, max_merges: int = MAX_MERGES) -> BPEModel:
 
     The merge list is a prefix-stable history: the model after N merges is
     exactly ``train_history(corpus).take(N)``. That is what lets the "number of
-    merges" slider be instant -- we train once and slice.
+    merges" slider be instant, we train once and slice.
     """
     return train(corpus, max_merges)
 
 
-DEFAULT_CORPUS = """
-the low lower lowest newer newest wider widest
-the cat sat on the mat the cat ate the rat
-lower newer wider slower faster stronger
-tokenizer tokenize tokenizing tokenized token tokens
-learning learner learned learns unlearn relearn
-the quick brown fox jumps over the lazy dog
-python pythonic pythonista pythons
-""".strip()
+def word_counts(corpus: str) -> list[tuple[str, int]]:
+    """``(word, occurrences)`` in order of first appearance.
+
+    This is literally what the algorithm starts from, so the demo shows it
+    rather than making the audience infer it from a wall of repeated words.
+    """
+    return list(Counter(_WORD_RE.findall(corpus)).items())
+
+
+# What the BPE demo starts from: small, and deliberately repetitive. The shared
+# endings (-er, -est, -ing) are the whole point, since they are what BPE finds.
+CORPUS: dict[str, int] = {
+    "slower": 3,
+    "slowest": 2,
+    "newer": 3,
+    "newest": 4,
+    "joke": 1,
+    "joking": 2,
+}
+
+DEFAULT_CORPUS = " ".join(
+    word for word, count in CORPUS.items() for _ in range(count)
+)

@@ -12,10 +12,17 @@ from __future__ import annotations
 
 import numpy as np
 
-# Laid out so that each theme occupies its own region of the plane, and the
-# gender axis (roughly +x) is consistent across the royalty/people pairs.
+# Laid out so that each theme occupies its own region of the plane *and* the
+# meaningful directions are exact:
+#
+#   gender     (+1.2,  0.0)   man   -> woman,  king  -> queen
+#   "baby of"  ( 0.0, +0.8)   cat   -> kitten, dog   -> puppy
+#   capital of (+0.6, +0.5)   greece-> athens, italy -> rome
+#
+# Because those offsets are identical within a theme, the vector arithmetic on
+# the analogy slide lands on the right word every single time.
 VECTORS: dict[str, tuple[float, float]] = {
-    # --- royalty & people: gender runs left->right, status runs bottom->top ---
+    # --- people: gender runs left->right, status runs bottom->top ---
     "king": (-1.00, 2.60),
     "queen": (0.20, 2.60),
     "prince": (-1.00, 1.90),
@@ -24,14 +31,14 @@ VECTORS: dict[str, tuple[float, float]] = {
     "woman": (0.20, 1.20),
     "boy": (-1.00, 0.60),
     "girl": (0.20, 0.60),
-    # --- animals ---
-    "cat": (-3.30, -0.60),
-    "dog": (-3.00, -1.10),
-    "kitten": (-3.60, -0.10),
-    "puppy": (-3.30, -1.60),
-    "horse": (-2.40, -0.80),
-    "mouse": (-3.90, -1.00),
-    "lion": (-2.70, -0.20),
+    # --- animals: babies sit 0.8 above their adult ---
+    "cat": (-3.20, -1.20),
+    "kitten": (-3.20, -0.40),
+    "dog": (-2.20, -1.60),
+    "puppy": (-2.20, -0.80),
+    "horse": (-3.90, -2.20),
+    "mouse": (-4.30, -1.30),
+    "lion": (-2.60, -2.40),
     # --- food ---
     "bread": (2.60, -1.50),
     "cheese": (3.10, -1.10),
@@ -40,23 +47,23 @@ VECTORS: dict[str, tuple[float, float]] = {
     "coffee": (3.60, -0.50),
     "wine": (3.10, -0.20),
     "souvlaki": (2.50, -2.60),
-    # --- countries & cities ---
-    "greece": (1.40, 2.90),
-    "athens": (2.00, 2.40),
-    "france": (0.90, 3.40),
-    "paris": (1.50, 3.90),
-    "italy": (2.30, 3.30),
-    "rome": (2.90, 3.80),
-    "japan": (0.40, 4.10),
-    "tokyo": (1.00, 4.60),
+    # --- countries & their capitals, offset by a constant (0.6, 0.5) ---
+    "greece": (2.00, 2.30),
+    "athens": (2.60, 2.80),
+    "france": (1.40, 3.60),
+    "paris": (2.00, 4.10),
+    "italy": (3.70, 3.10),
+    "rome": (4.30, 3.60),
+    "japan": (2.20, 5.60),
+    "tokyo": (2.80, 6.10),
     # --- programming ---
-    "python": (-2.80, 2.20),
-    "java": (-3.30, 1.70),
-    "function": (-2.40, 1.30),
-    "variable": (-2.90, 0.90),
-    "loop": (-2.30, 0.60),
-    "compiler": (-3.70, 1.20),
-    "debug": (-2.00, 1.80),
+    "python": (-3.80, 3.20),
+    "java": (-4.30, 2.70),
+    "function": (-3.40, 2.30),
+    "variable": (-3.90, 1.90),
+    "loop": (-3.30, 1.60),
+    "compiler": (-4.70, 2.20),
+    "debug": (-3.00, 2.80),
     # --- weather ---
     "rain": (0.60, -2.80),
     "snow": (0.10, -3.30),
@@ -83,6 +90,7 @@ ANALOGIES: tuple[tuple[str, str, str], ...] = (
     ("athens", "greece", "france"),
     ("paris", "france", "italy"),
     ("kitten", "cat", "dog"),
+    ("puppy", "dog", "cat"),
 )
 
 

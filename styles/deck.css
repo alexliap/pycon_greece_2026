@@ -1,0 +1,481 @@
+/* ==========================================================================
+   LLMs: from 0 to 0.1, deck styles
+   Loaded by marimo.App(css_file="styles/deck.css").
+
+   Everything the demos draw is plain HTML styled here, so there is one place
+   to adjust contrast and type size before walking on stage.
+
+   Colours come from the validated reference palette. Only the first three
+   categorical slots are used for identity (blue / orange / aqua), which is the
+   subset documented as safe for all-pairs comparison in both light and dark.
+   ========================================================================== */
+
+.pl {
+  --surface-1: #fcfcfb;
+  --surface-2: #f0efec;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #78776f;
+  --border: #d9d8d2;
+
+  --series-1: #2a78d6; /* selected / kept / "the answer" */
+  --series-2: #eb6834; /* the computed analogy target */
+  --series-3: #1baf7a; /* neighbours */
+  --neutral: #a5a49c; /* filtered out, or "no role" */
+
+  /* One hue, varying alpha: recedes toward whatever surface is behind it,
+     so the same ramp reads correctly in light and dark mode. */
+  --heat-hue: 42, 120, 214;
+
+  --chip-1: #cde2fb;
+  --chip-2: #fbdfd2;
+  --chip-3: #c9ece0;
+  --chip-4: #fbecc7;
+  --chip-5: #fadde7;
+
+  color: var(--text-primary);
+}
+
+/* Dark tokens follow *marimo's* theme, never the OS setting. The two are
+   independent: with the OS in dark mode and the deck in light mode, keying off
+   prefers-color-scheme paints dark chart colours onto a white slide. */
+:root[data-theme="dark"] .pl,
+html.dark .pl,
+body.dark .pl,
+.dark .pl {
+  --surface-1: #1a1a19;
+  --surface-2: #242422;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #93928a;
+  --border: #3a3a36;
+
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --neutral: #6e6d66;
+
+  --heat-hue: 57, 135, 229;
+
+  --chip-1: #1c3a5e;
+  --chip-2: #5c2c17;
+  --chip-3: #144534;
+  --chip-4: #55400f;
+  --chip-5: #55253a;
+}
+
+/* --- generic bits ------------------------------------------------------- */
+
+.pl-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 0.5rem;
+}
+
+.pl-note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+}
+
+.pl-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* A table capped by viz.table(max_height=...): scrolls vertically with its
+   header row pinned, so you never lose the column labels. */
+.pl-scroll.is-tall {
+  overflow-y: auto;
+}
+
+.pl-scroll.is-tall thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface-1);
+}
+
+/* --- token chips -------------------------------------------------------- */
+
+.pl-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  line-height: 1.35;
+}
+
+.pl-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3px 6px;
+  border-radius: 5px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 1.02rem;
+  white-space: pre;
+  color: var(--text-primary);
+}
+
+.pl-chip-0 { background: var(--chip-1); }
+.pl-chip-1 { background: var(--chip-2); }
+.pl-chip-2 { background: var(--chip-3); }
+.pl-chip-3 { background: var(--chip-4); }
+.pl-chip-4 { background: var(--chip-5); }
+
+.pl-chip-id {
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  margin-top: 1px;
+}
+
+/* --- stat tiles --------------------------------------------------------- */
+
+.pl-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin: 0.6rem 0;
+}
+
+.pl-stat-value {
+  font-size: 1.9rem;
+  font-weight: 650;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.pl-stat-value.is-accent { color: var(--series-1); }
+.pl-stat-value.is-warn { color: var(--series-2); }
+
+.pl-stat-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+/* --- horizontal bars ---------------------------------------------------- */
+
+.pl-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 2px; /* 2px surface gap between adjacent fills */
+}
+
+.pl-bar {
+  display: grid;
+  grid-template-columns: 8.5rem 1fr 4.5rem;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.pl-bar-label {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.92rem;
+  text-align: right;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pl-bar-track {
+  background: var(--surface-2);
+  border-radius: 4px;
+  height: 17px;
+  overflow: hidden;
+}
+
+.pl-bar-fill {
+  height: 100%;
+  background: var(--series-1);
+  /* square at the baseline, rounded at the data end */
+  border-radius: 0 4px 4px 0;
+  min-width: 2px;
+}
+
+.pl-bar.is-cut .pl-bar-fill {
+  background: var(--neutral);
+}
+
+.pl-bar.is-cut .pl-bar-label,
+.pl-bar.is-cut .pl-bar-value {
+  color: var(--text-muted);
+}
+
+.pl-bar-value {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+}
+
+/* --- heatmap ------------------------------------------------------------ */
+
+.pl-heat {
+  display: grid;
+  gap: 2px;
+  font-size: 0.8rem;
+}
+
+.pl-heat-cell {
+  min-width: 2.1rem;
+  height: 2.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.72rem;
+}
+
+.pl-heat-cell.is-masked {
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 3px,
+    var(--border) 3px,
+    var(--border) 4px
+  );
+}
+
+.pl-heat-label {
+  display: flex;
+  align-items: center;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.pl-heat-label.is-row {
+  justify-content: flex-end;
+  padding-right: 0.4rem;
+}
+
+.pl-heat-label.is-col {
+  align-items: flex-end;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  height: 4.6rem;
+}
+
+/* --- scatter ------------------------------------------------------------ */
+
+.pl-scatter {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--surface-2);
+  border-radius: 8px;
+}
+
+.pl-dot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.pl-dot::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--neutral);
+  /* 2px surface ring so overlapping marks stay separable */
+  box-shadow: 0 0 0 2px var(--surface-2);
+  flex: none;
+}
+
+.pl-dot.is-selected::before { background: var(--series-1); width: 13px; height: 13px; }
+.pl-dot.is-neighbour::before { background: var(--series-3); width: 11px; height: 11px; }
+.pl-dot.is-target::before { background: var(--series-2); width: 13px; height: 13px; }
+
+.pl-dot.is-selected,
+.pl-dot.is-target {
+  color: var(--text-primary);
+  font-weight: 650;
+  font-size: 0.85rem;
+  z-index: 2;
+}
+
+.pl-dot.is-neighbour { color: var(--text-primary); font-weight: 550; z-index: 1; }
+
+.pl-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
+}
+
+.pl-legend-item { display: flex; align-items: center; gap: 6px; }
+
+.pl-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+
+/* --- tables ------------------------------------------------------------- */
+
+.pl-table {
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  width: 100%;
+}
+
+.pl-table th {
+  text-align: left;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 0.3rem 0.7rem 0.3rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.pl-table td {
+  padding: 0.24rem 0.7rem 0.24rem 0;
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+
+.pl-table td.is-token {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  color: var(--series-1);
+  font-weight: 600;
+}
+
+.pl-table tr.is-new td { background: color-mix(in srgb, var(--series-1) 12%, transparent); }
+
+.pl-mono {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+/* --- inline code -------------------------------------------------------- */
+
+/* marimo renders `like this` as a bare <code> with no background, so it
+   disappears into the prose on a projector. Give it a chip.
+   Fenced blocks are deliberately left alone -- marimo already themes those,
+   and overriding the background fights its syntax highlighting. */
+.markdown :not(pre) > code {
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: 5px;
+  padding: 0.08em 0.36em;
+  font-size: 0.9em;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  color: var(--code-ink);
+  white-space: nowrap;
+}
+
+/* Tokens for everything marimo renders as plain prose (inline code, tables).
+   These follow marimo's theme, never the OS setting. */
+.markdown {
+  --code-bg: #f0efec;
+  --code-border: #d9d8d2;
+  --code-ink: #1c5cab;
+  --table-border: #d9d8d2;
+  --table-muted: #78776f;
+}
+
+:root[data-theme="dark"] .markdown,
+html.dark .markdown,
+body.dark .markdown,
+.dark .markdown {
+  --code-bg: #242422;
+  --code-border: #3a3a36;
+  --code-ink: #86b6ef;
+  --table-border: #3a3a36;
+  --table-muted: #93928a;
+}
+
+/* --- markdown tables ---------------------------------------------------- */
+
+/* Comparison tables in the slide prose (the three ways to cut text, the Greek
+   token cost) arrive as a bare <table> with no classes. Give them room to
+   breathe and a header rule, and let a wide one scroll rather than shoving the
+   slide off screen. */
+.markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.9rem 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  display: block;
+  overflow-x: auto;
+}
+
+.markdown table th {
+  text-align: left;
+  vertical-align: bottom;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 650;
+  color: var(--table-muted);
+  padding: 0.3rem 0.9rem 0.35rem 0;
+  border-bottom: 2px solid var(--table-border);
+  white-space: nowrap;
+}
+
+.markdown table td {
+  vertical-align: top;
+  padding: 0.5rem 0.9rem 0.5rem 0;
+  border-bottom: 1px solid var(--table-border);
+}
+
+.markdown table tr:last-child td {
+  border-bottom: none;
+}
+
+/* --- presentation readability ------------------------------------------ */
+
+/* marimo gives slide content a bare 20px side margin, so with width="full"
+   prose runs right to the edge of a projector. Add real breathing room.
+   Padding on the section, because the margin itself is an inline style. */
+.reveal .slides section {
+  padding: 0 2.5rem;
+  box-sizing: border-box;
+}
+
+/* Cap the line length of prose only. Charts and demo panels stay full width,
+   which is what they need; a 3000px-wide line of body text is unreadable. */
+.reveal .slides section .paragraph,
+.reveal .slides section ul,
+.reveal .slides section ol,
+.reveal .slides section blockquote {
+  max-width: 68rem;
+}
+
+/* marimo's slide view; nudge type up so the back row can read it.
+   NOTE: .markdown is `display: contents`, so it generates no box -- only
+   inherited properties like font-size take effect here, never width or margin. */
+#slide-container .markdown,
+.slides .markdown {
+  font-size: 1.12rem;
+  line-height: 1.6;
+}
+
+#slide-container h1,
+.slides h1 {
+  font-size: 2.3rem;
+  line-height: 1.15;
+  margin-bottom: 0.7rem;
+}
+
+#slide-container blockquote,
+.slides blockquote {
+  border-left: 3px solid var(--series-1, #2a78d6);
+}

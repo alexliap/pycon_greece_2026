@@ -1,4 +1,4 @@
-# **LLMs: from 0 to 0.1**
+## **LLMs: from 0 to 0.1**
 
 Building intuition before building intelligence
 
