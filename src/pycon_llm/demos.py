@@ -6,8 +6,6 @@ file only arranges results on screen, so the demos stay easy to rearrange while
 rehearsing.
 """
 
-from __future__ import annotations
-
 import marimo as mo
 
 from . import attention as attn
@@ -62,13 +60,6 @@ def bpe_panel(corpus: str, num_merges: int) -> mo.Html:
             ("available merges", f"{len(full.merges)}", ""),
         ]
     )
-
-    exhausted = ""
-    if num_merges > len(full.merges):
-        exhausted = viz.note(
-            f"Only {len(full.merges)} merges are possible on this text. After that "
-            "no pair repeats, so there is nothing left worth merging."
-        )
 
     counts = bpe.word_counts(corpus)
     corpus_list = mo.md(
@@ -127,7 +118,7 @@ def tokenizer_panel(text: str, encoding_name: str) -> mo.Html:
 
 
 def tokenizer_comparison(text: str) -> mo.Html:
-    """The same text through every encoding -- how tokenizers got better over time."""
+    """The same text through every encoding, how tokenizers got better over time."""
     rows = []
     for name, label in tokenizers.ENCODINGS.items():
         encoder = tokenizers.get_encoder(name)

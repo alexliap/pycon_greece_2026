@@ -84,10 +84,8 @@ class TestStats(unittest.TestCase):
         self.assertGreater(greek["tokens"], english["tokens"])
         self.assertLess(greek["chars_per_token"], english["chars_per_token"])
 
-    def test_examples_are_all_non_empty(self):
-        for label, text in tokenizers.EXAMPLES.items():
-            with self.subTest(example=label):
-                self.assertTrue(text.strip())
+    def test_example_is_non_empty(self):
+        self.assertTrue(tokenizers.EXAMPLE.strip())
 
 
 class TestWarmCache(unittest.TestCase):

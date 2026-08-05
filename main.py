@@ -18,7 +18,7 @@ def _():
     from pycon_llm.common import read_slide
     from pycon_llm.embeddings import ANALOGIES, WORDS
     from pycon_llm.sampling import DEFAULT_PROMPTS, ToyLM
-    from pycon_llm.tokenizers import DEFAULT_ENCODING, ENCODINGS, EXAMPLES
+    from pycon_llm.tokenizers import DEFAULT_ENCODING, ENCODINGS, EXAMPLE
 
     toy_lm = ToyLM.train()
     return (
@@ -27,7 +27,7 @@ def _():
         DEFAULT_ENCODING,
         DEFAULT_PROMPTS,
         ENCODINGS,
-        EXAMPLES,
+        EXAMPLE,
         HEADS,
         MAX_MERGES,
         SENTENCES,
@@ -123,38 +123,35 @@ def _(DEFAULT_CORPUS, bpe_merges, demos, mo, read_slide):
         ],
         widths=[1.0, 1.5],
         align="center",
-        gap=1.5,
+        gap=3,
     )
     return
 
 
 @app.cell
-def _(DEFAULT_ENCODING, ENCODINGS, EXAMPLES, mo):
-    tok_example = mo.ui.dropdown(
-        options=EXAMPLES, value="English vs Greek", label="Example"
-    )
+def _(DEFAULT_ENCODING, ENCODINGS, mo):
     tok_encoding = mo.ui.dropdown(
         options={label: name for name, label in ENCODINGS.items()},
         value=ENCODINGS[DEFAULT_ENCODING],
         label="Tokenizer",
     )
-    return tok_encoding, tok_example
+    return (tok_encoding,)
 
 
 @app.cell
-def _(mo, tok_example):
+def _(EXAMPLE, mo):
     tok_text = mo.ui.text_area(
-        value=tok_example.value, label="Your text", rows=3, full_width=True
+        value=EXAMPLE, label="Your text", rows=3, full_width=True
     )
     return (tok_text,)
 
 
 @app.cell
-def _(demos, mo, read_slide, tok_encoding, tok_example, tok_text):
+def _(demos, mo, read_slide, tok_encoding, tok_text):
     mo.vstack(
         [
             mo.md(read_slide("tokenizer_playground")),
-            mo.hstack([tok_example, tok_encoding], justify="start", gap=1.5),
+            tok_encoding,
             tok_text,
             demos.tokenizer_panel(tok_text.value, tok_encoding.value),
             mo.md("**The same text through every generation of tokenizer**"),

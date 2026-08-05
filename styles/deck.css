@@ -18,10 +18,14 @@
   --text-muted: #78776f;
   --border: #d9d8d2;
 
-  --series-1: #2a78d6; /* selected / kept / "the answer" */
-  --series-2: #eb6834; /* the computed analogy target */
-  --series-3: #1baf7a; /* neighbours */
-  --neutral: #a5a49c; /* filtered out, or "no role" */
+  --series-1: #2a78d6;
+  /* selected / kept / "the answer" */
+  --series-2: #eb6834;
+  /* the computed analogy target */
+  --series-3: #1baf7a;
+  /* neighbours */
+  --neutral: #a5a49c;
+  /* filtered out, or "no role" */
 
   /* One hue, varying alpha: recedes toward whatever surface is behind it,
      so the same ramp reads correctly in light and dark mode. */
@@ -118,11 +122,25 @@ body.dark .pl,
   color: var(--text-primary);
 }
 
-.pl-chip-0 { background: var(--chip-1); }
-.pl-chip-1 { background: var(--chip-2); }
-.pl-chip-2 { background: var(--chip-3); }
-.pl-chip-3 { background: var(--chip-4); }
-.pl-chip-4 { background: var(--chip-5); }
+.pl-chip-0 {
+  background: var(--chip-1);
+}
+
+.pl-chip-1 {
+  background: var(--chip-2);
+}
+
+.pl-chip-2 {
+  background: var(--chip-3);
+}
+
+.pl-chip-3 {
+  background: var(--chip-4);
+}
+
+.pl-chip-4 {
+  background: var(--chip-5);
+}
 
 .pl-chip-id {
   font-size: 0.68rem;
@@ -146,8 +164,13 @@ body.dark .pl,
   color: var(--text-primary);
 }
 
-.pl-stat-value.is-accent { color: var(--series-1); }
-.pl-stat-value.is-warn { color: var(--series-2); }
+.pl-stat-value.is-accent {
+  color: var(--series-1);
+}
+
+.pl-stat-value.is-warn {
+  color: var(--series-2);
+}
 
 .pl-stat-label {
   font-size: 0.78rem;
@@ -161,7 +184,8 @@ body.dark .pl,
 .pl-bars {
   display: flex;
   flex-direction: column;
-  gap: 2px; /* 2px surface gap between adjacent fills */
+  gap: 2px;
+  /* 2px surface gap between adjacent fills */
 }
 
 .pl-bar {
@@ -231,13 +255,11 @@ body.dark .pl,
 }
 
 .pl-heat-cell.is-masked {
-  background: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 3px,
-    var(--border) 3px,
-    var(--border) 4px
-  );
+  background: repeating-linear-gradient(45deg,
+      transparent,
+      transparent 3px,
+      var(--border) 3px,
+      var(--border) 4px);
 }
 
 .pl-heat-label {
@@ -294,9 +316,23 @@ body.dark .pl,
   flex: none;
 }
 
-.pl-dot.is-selected::before { background: var(--series-1); width: 13px; height: 13px; }
-.pl-dot.is-neighbour::before { background: var(--series-3); width: 11px; height: 11px; }
-.pl-dot.is-target::before { background: var(--series-2); width: 13px; height: 13px; }
+.pl-dot.is-selected::before {
+  background: var(--series-1);
+  width: 13px;
+  height: 13px;
+}
+
+.pl-dot.is-neighbour::before {
+  background: var(--series-3);
+  width: 11px;
+  height: 11px;
+}
+
+.pl-dot.is-target::before {
+  background: var(--series-2);
+  width: 13px;
+  height: 13px;
+}
 
 .pl-dot.is-selected,
 .pl-dot.is-target {
@@ -306,7 +342,11 @@ body.dark .pl,
   z-index: 2;
 }
 
-.pl-dot.is-neighbour { color: var(--text-primary); font-weight: 550; z-index: 1; }
+.pl-dot.is-neighbour {
+  color: var(--text-primary);
+  font-weight: 550;
+  z-index: 1;
+}
 
 .pl-legend {
   display: flex;
@@ -317,7 +357,11 @@ body.dark .pl,
   margin-top: 0.5rem;
 }
 
-.pl-legend-item { display: flex; align-items: center; gap: 6px; }
+.pl-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
 .pl-legend-swatch {
   width: 10px;
@@ -357,7 +401,9 @@ body.dark .pl,
   font-weight: 600;
 }
 
-.pl-table tr.is-new td { background: color-mix(in srgb, var(--series-1) 12%, transparent); }
+.pl-table tr.is-new td {
+  background: color-mix(in srgb, var(--series-1) 12%, transparent);
+}
 
 .pl-mono {
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
@@ -369,7 +415,7 @@ body.dark .pl,
    disappears into the prose on a projector. Give it a chip.
    Fenced blocks are deliberately left alone -- marimo already themes those,
    and overriding the background fights its syntax highlighting. */
-.markdown :not(pre) > code {
+.markdown :not(pre)>code {
   background: var(--code-bg);
   border: 1px solid var(--code-border);
   border-radius: 5px;
@@ -456,7 +502,7 @@ body.dark .markdown,
 .reveal .slides section ul,
 .reveal .slides section ol,
 .reveal .slides section blockquote {
-  max-width: 68rem;
+  max-width: 80rem;
 }
 
 /* marimo's slide view; nudge type up so the back row can read it.
@@ -468,11 +514,27 @@ body.dark .markdown,
   line-height: 1.6;
 }
 
+/* reveal.js's bundled theme sets h1/h2/h3 to 28pt/24pt/22pt with !important,
+   so a plain override here loses the cascade and every level renders within
+   a few pt of the others. !important plus the extra .reveal .slides section
+   specificity is what it takes to actually win that fight. */
 #slide-container h1,
-.slides h1 {
-  font-size: 2.3rem;
+.slides h1,
+.reveal .slides section h1 {
+  font-size: 2.3rem !important;
   line-height: 1.15;
   margin-bottom: 0.7rem;
+}
+
+/* h3 is only ever a subtitle under an h1 (the title slide); h2 is left at
+   reveal's default because several slides use it as their main heading.
+   --table-muted is defined on .markdown (see below) for both themes, so it
+   stays correct in dark mode too. */
+.reveal .slides section h3 {
+  font-size: 1.7rem !important;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--table-muted, inherit);
 }
 
 #slide-container blockquote,

@@ -1,6 +1,6 @@
 ## Let's train one
 
-### Wait, 256 values for every character on Earth?
+# Wait, 256 values for every character on Earth?
 
 Unicode defines about **155,000** characters, so no, 256 is not the number of
 characters. It is the size of the **alphabet they are spelled with**.

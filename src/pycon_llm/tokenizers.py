@@ -37,13 +37,21 @@ class Encoder:
         return self.encoding.encode(text)
 
     def decode_pieces(self, text: str) -> list[str]:
-        """The token boundaries as human-readable strings, which is what we colour."""
-        return [
-            self.encoding.decode_single_token_bytes(token_id).decode(
-                "utf-8", errors="replace"
-            )
-            for token_id in self.encode(text)
-        ]
+        """The token boundaries as human-readable strings, which is what we colour.
+
+        A token that lands mid-character (a multi-byte emoji or Greek letter cut
+        in half by a merge boundary) isn't valid UTF-8 on its own, so instead of
+        a "�" blob we print the raw bytes in hex, joined with a non-breaking
+        space so ``_visible`` in viz.py leaves it alone.
+        """
+        pieces = []
+        for token_id in self.encode(text):
+            raw = self.encoding.decode_single_token_bytes(token_id)
+            try:
+                pieces.append(raw.decode("utf-8"))
+            except UnicodeDecodeError:
+                pieces.append("\u00a0".join(f"{byte:02X}" for byte in raw))
+        return pieces
 
     def tokens(self, text: str) -> list[tuple[str, int]]:
         """``(piece, token_id)`` pairs, ready for rendering."""
@@ -71,9 +79,7 @@ def get_encoder(name: str = DEFAULT_ENCODING) -> Encoder:
 def warm_cache() -> list[str]:
     """Download every encoding into the local cache. Run this before travelling."""
     TIKTOKEN_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    return [
-        f"{name}: ok ({get_encoder(name).vocab_size} tokens)" for name in ENCODINGS
-    ]
+    return [f"{name}: ok ({get_encoder(name).vocab_size} tokens)" for name in ENCODINGS]
 
 
 def token_stats(text: str, encoder: Encoder) -> dict[str, float]:
@@ -96,12 +102,9 @@ def token_stats(text: str, encoder: Encoder) -> dict[str, float]:
     }
 
 
-# Prepared examples for the playground. The Greek/English pair is the point of
-# the slide: identical meaning, wildly different token cost.
-EXAMPLES: dict[str, str] = {
-    "English vs Greek": "Good morning Athens, welcome to PyCon!\nΚαλημέρα Αθήνα, καλώς ήρθατε στο PyCon!",
-    "Counting r's": "strawberry raspberry blueberry",
-    "Numbers": "1234567 + 89 = 1234656\nThe year 2026, price 19.99",
-    "Whitespace & code": "def hello():\n    return 'world'",
-    "Emoji": "PyCon Greece 2026 🇬🇷 🐍 🎉",
-}
+# Prepared example for the playground: an English sentence and an unrelated
+# Greek sentence, with numbers and emoji mixed in.
+EXAMPLE: str = (
+    "It rained for 3 days straight and the temperature dropped to 5 degrees. 🌧️\n"
+    "Ο καφές κοστίζει 2 ευρώ και είναι έτοιμος σε 5 λεπτά. ☕"
+)
