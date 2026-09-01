@@ -389,12 +389,6 @@ def perplexity_panel(model: sampling.ToyLM, text: str) -> mo.Html:
         title="Probability the model assigned to each word it actually saw",
     )
 
-    verdict = (
-        "Low perplexity: this looks like the text it was trained on."
-        if score < 10
-        else "High perplexity: the model finds this text surprising."
-    )
-
     summary = viz.stats(
         [
             ("perplexity", f"{score:.1f}", "accent" if score < 10 else "warn"),
@@ -406,11 +400,21 @@ def perplexity_panel(model: sampling.ToyLM, text: str) -> mo.Html:
         [
             mo.Html(summary),
             mo.Html(chart),
-            mo.Html(
-                viz.note(
-                    f"{verdict} Perplexity is roughly “how many words was the model "
-                    "torn between, on average?” 1.0 would be perfect confidence."
-                )
-            ),
         ]
+    )
+
+
+def eval_mismatch_panel() -> mo.Html:
+    """A metric being right and the model being wrong, side by side."""
+    return mo.Html(
+        viz.mismatch(
+            scored_kind="Scored as multiple choice / perplexity",
+            scored_prompt='"The capital of Australia is ___"',
+            scored_answer="Canberra",
+            scored_detail="lowest perplexity of any candidate, correct against Sydney in a 4-way multiple choice",
+            chat_kind="Asked in chat",
+            chat_prompt='"What\'s the capital of Australia?"',
+            chat_answer="Sydney",
+            chat_detail="free-form generation, same model, same knowledge",
+        )
     )

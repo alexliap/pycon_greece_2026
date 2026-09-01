@@ -33,6 +33,7 @@ SUB_SLIDES: frozenset[str] = frozenset(
         "tokenizer_playground",
         "attention_math",
         "why_nondeterministic",
+        "evaluation_caveat",
     }
 )
 

@@ -437,6 +437,74 @@ body.dark .pl,
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
 }
 
+/* --- mismatch cards ------------------------------------------------------ */
+
+.pl-mismatch {
+  display: flex;
+  align-items: stretch;
+  gap: 1.1rem;
+  margin: 0.7rem 0;
+  flex-wrap: wrap;
+}
+
+.pl-mismatch-card {
+  flex: 1 1 14rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.pl-mismatch-kind {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 0.55rem;
+}
+
+.pl-mismatch-prompt {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.pl-mismatch-answer {
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.pl-mismatch-answer.is-good {
+  color: var(--series-3);
+}
+
+.pl-mismatch-answer.is-bad {
+  color: var(--series-2);
+}
+
+.pl-mismatch-mark {
+  font-size: 1.05rem;
+}
+
+.pl-mismatch-detail {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+}
+
+.pl-mismatch-versus {
+  align-self: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 /* --- inline code -------------------------------------------------------- */
 
 /* marimo renders `like this` as a bare <code> with no background, so it

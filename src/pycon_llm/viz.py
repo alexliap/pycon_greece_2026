@@ -260,3 +260,43 @@ def table(
 
 def note(message: str) -> str:
     return wrap(f'<p class="pl-note">{message}</p>')
+
+
+def mismatch(
+    scored_kind: str,
+    scored_prompt: str,
+    scored_answer: str,
+    scored_detail: str,
+    chat_kind: str,
+    chat_prompt: str,
+    chat_answer: str,
+    chat_detail: str,
+    connector: str = "same model",
+) -> str:
+    """Two cards, side by side: what the eval scored vs. what the model actually said.
+
+    Built for the one case a slide needs to show a metric being right and the
+    model being wrong at the same time -- a paragraph of prose does not make
+    that contrast land the way two cards next to each other do.
+    """
+
+    def card(kind: str, prompt: str, answer: str, detail: str, good: bool) -> str:
+        cls = "is-good" if good else "is-bad"
+        mark = "✓" if good else "✗"
+        return (
+            '<div class="pl-mismatch-card">'
+            f'<div class="pl-mismatch-kind">{escape(kind)}</div>'
+            f'<div class="pl-mismatch-prompt">{escape(prompt)}</div>'
+            f'<div class="pl-mismatch-answer {cls}">{escape(answer)} '
+            f'<span class="pl-mismatch-mark">{mark}</span></div>'
+            f'<div class="pl-mismatch-detail">{escape(detail)}</div>'
+            "</div>"
+        )
+
+    return wrap(
+        '<div class="pl-mismatch">'
+        + card(scored_kind, scored_prompt, scored_answer, scored_detail, True)
+        + f'<div class="pl-mismatch-versus">{escape(connector)}</div>'
+        + card(chat_kind, chat_prompt, chat_answer, chat_detail, False)
+        + "</div>"
+    )

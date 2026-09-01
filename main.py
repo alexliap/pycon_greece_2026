@@ -500,6 +500,21 @@ def _(demos, eval_text, mo, read_slide, toy_lm):
 
 
 @app.cell
+def _(demos, mo, read_slide):
+    # Nested under the evaluation slide (down arrow), so the metrics get their
+    # own beat before the caveat about what they miss.
+    # See SUB_SLIDES / FRAGMENTS in scripts/build_layout.py.
+    mo.vstack(
+        [
+            mo.md(read_slide("evaluation_caveat")),
+            demos.eval_mismatch_panel(),
+        ],
+        gap=1.0,
+    )
+    return
+
+
+@app.cell
 def _(mo, read_slide):
     mo.md(read_slide("recap"))
     return

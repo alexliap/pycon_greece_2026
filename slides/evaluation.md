@@ -3,7 +3,7 @@
 **Exact match:** did it produce the expected string?
 Cheap and objective, and it fails the moment there are two correct answers.
 
-**Multiple choice:** score each option, take the highest.
+**Multiple choice:** probability each option, take the highest.
 This is what most public benchmarks actually do. It measures recognition, which
 is not the same as being useful.
 
