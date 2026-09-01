@@ -16,7 +16,7 @@ def _():
     from pycon_llm.attention import HEADS, SENTENCES
     from pycon_llm.bpe import DEFAULT_CORPUS, MAX_MERGES
     from pycon_llm.common import read_slide
-    from pycon_llm.embeddings import ANALOGIES, WORDS
+    from pycon_llm.embeddings import ANALOGIES
     from pycon_llm.sampling import DEFAULT_PROMPTS, ToyLM
     from pycon_llm.tokenizers import DEFAULT_ENCODING, ENCODINGS, EXAMPLE
 
@@ -31,7 +31,6 @@ def _():
         HEADS,
         MAX_MERGES,
         SENTENCES,
-        WORDS,
         demos,
         mo,
         read_slide,
@@ -177,28 +176,21 @@ def _(demos, mo, read_slide):
 
 @app.cell
 def _(mo, read_slide):
-    mo.md(read_slide("embeddings"))
-    return
-
-
-@app.cell
-def _(WORDS, mo):
-    emb_word = mo.ui.dropdown(options=list(WORDS), value="cat", label="Word")
-    emb_neighbours = mo.ui.slider(
-        start=1, stop=8, value=4, label="Neighbours", show_value=True
-    )
-    return emb_neighbours, emb_word
-
-
-@app.cell
-def _(demos, emb_neighbours, emb_word, mo, read_slide):
     mo.vstack(
         [
-            mo.md(read_slide("embeddings_demo")),
-            mo.hstack([emb_word, emb_neighbours], justify="start", gap=1.5),
-            demos.embedding_panel(emb_word.value, emb_neighbours.value),
+            mo.md("# **Embeddings** → From IDs to meaning"),
+            mo.mermaid(
+                """
+                graph LR
+                    tokenizer["✅ Tokenizer"]
+                    neural_network[Neural Network]
+
+                    tokenizer --> neural_network
+                """
+            ),
+            mo.md(read_slide("embeddings")),
         ],
-        gap=0.8,
+        gap=0.4,
     )
     return
 

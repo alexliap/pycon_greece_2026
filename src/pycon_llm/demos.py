@@ -186,42 +186,6 @@ def language_cost() -> mo.Html:
 # --------------------------------------------------------------------------
 
 
-def embedding_panel(word: str, neighbours: int) -> mo.Html:
-    """Scatter of the toy space with a word and its nearest neighbours picked out."""
-    near = dict(embeddings.nearest(word, neighbours))
-
-    points = []
-    for other in embeddings.WORDS:
-        x, y = embeddings.VECTORS[other]
-        if other == word:
-            role = "selected"
-        elif other in near:
-            role = "neighbour"
-        else:
-            role = ""
-        points.append((other, x, y, role))
-
-    chart = viz.scatter(
-        points,
-        legend=[
-            (word, _SERIES_1),
-            ("nearest neighbours", _SERIES_3),
-        ],
-    )
-
-    table = viz.table(
-        headers=["neighbour", "distance"],
-        rows=[[name, f"{distance:.2f}"] for name, distance in near.items()],
-    )
-
-    return mo.hstack(
-        [mo.Html(chart), mo.vstack([mo.md("**Closest words**"), mo.Html(table)])],
-        widths=[2.0, 0.8],
-        gap=1.5,
-        align="start",
-    )
-
-
 def analogy_panel(a: str, b: str, c: str) -> mo.Html:
     """``a - b + c`` drawn in the space, with the winning word called out."""
     results = embeddings.analogy(a, b, c)
