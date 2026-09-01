@@ -549,6 +549,14 @@ body.dark .markdown,
   margin-bottom: 0.7rem;
 }
 
+/* The title slide's h1 is the talk name, not a section heading - it gets to
+   run bigger than every other slide's h1 without inflating them too. The
+   extra `section:first-of-type` specificity is what lets it win over the
+   shared rule above. */
+.reveal .slides>section:first-of-type h1 {
+  font-size: 4.2rem !important;
+}
+
 /* h3 is only ever a subtitle under an h1 (the title slide); h2 is left at
    reveal's default because several slides use it as their main heading.
    --table-muted is defined on .markdown (see below) for both themes, so it
