@@ -31,6 +31,7 @@ SUB_SLIDES: frozenset[str] = frozenset(
     {
         "bpe_live",
         "tokenizer_playground",
+        "attention_math",
     }
 )
 
@@ -40,6 +41,7 @@ SUB_SLIDES: frozenset[str] = frozenset(
 FRAGMENTS: frozenset[str] = frozenset(
     {
         "bpe_idea",
+        "attention",
     }
 )
 

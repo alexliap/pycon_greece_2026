@@ -225,7 +225,76 @@ def _(mo, read_slide):
 
 @app.cell
 def _(mo, read_slide):
+    # Revealed on the next click, on top of the context slide.
+    # See SUB_SLIDES / FRAGMENTS in scripts/build_layout.py.
     mo.md(read_slide("attention"))
+    return
+
+
+@app.cell
+def _(mo, read_slide):
+    # Nested under the context slide (down arrow), after the attention
+    # fragment. See SUB_SLIDES / FRAGMENTS in scripts/build_layout.py.
+    mo.hstack(
+        [
+            mo.md(read_slide("attention_math")),
+            mo.vstack(
+                [
+                    mo.md("**Attention**"),
+                    mo.mermaid(
+                        """
+                        graph LR
+                            x[Input X]
+                            wq[W_Q]
+                            wk[W_K]
+                            wv[W_V]
+                            q[Q]
+                            k[K]
+                            v[V]
+                            scores["Q · Kᵀ"]
+                            softmax[softmax]
+                            out[Weighted output]
+
+                            x --> wq --> q
+                            x --> wk --> k
+                            x --> wv --> v
+                            q --> scores
+                            k --> scores
+                            scores --> softmax
+                            softmax --> out
+                            v --> out
+                        """
+                    ),
+                    mo.md("**Multi-head attention**"),
+                    mo.mermaid(
+                        """
+                        graph TD
+                            x[Input X]
+                            h1["Head 1: Q,K,V → Attention"]
+                            h2["Head 2: Q,K,V → Attention"]
+                            hdots["..."]
+                            concat[Concat]
+                            wo[W_O]
+                            out[Output]
+
+                            x --> h1
+                            x --> h2
+                            x --> hdots
+                            h1 --> concat
+                            h2 --> concat
+                            hdots --> concat
+                            concat --> wo --> out
+                        """
+                    ),
+                ],
+                gap=2.0,
+            ),
+        ],
+        align="center",
+        wrap=True,
+        gap=2.5,
+        widths=[1.0, 1.3],
+    )
     return
 
 

@@ -572,3 +572,13 @@ body.dark .markdown,
 .slides blockquote {
   border-left: 3px solid var(--series-1, #2a78d6);
 }
+
+/* mermaid.js renders each diagram's svg at its own intrinsic pixel size and
+   only ever shrinks it to fit a narrow container, never grows it -- so two
+   small diagrams side by side look tiny even with plenty of room. Force the
+   svg to fill whatever box it's given instead. */
+marimo-mermaid svg {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
