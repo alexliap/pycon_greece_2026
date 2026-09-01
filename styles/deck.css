@@ -252,6 +252,11 @@ body.dark .pl,
   display: grid;
   gap: 2px;
   font-size: 0.8rem;
+  /* Grid's default behaviour stretches "auto" columns to fill any leftover
+     container width, so a short sentence's cells end up much wider than the
+     2.1rem they're sized for below. This keeps every cell at its natural
+     size instead of stretching to fill the row. */
+  justify-content: start;
 }
 
 .pl-heat-cell {
