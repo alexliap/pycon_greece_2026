@@ -405,6 +405,16 @@ body.dark .pl,
   background: color-mix(in srgb, var(--series-1) 12%, transparent);
 }
 
+/* The token_gotchas slide has only this one table, so it can run bigger than
+   the shared .pl-table default without crowding anything else. */
+.language-cost-table .pl-table {
+  font-size: 1.2rem;
+}
+
+.language-cost-table .pl-table th {
+  font-size: 1.2rem;
+}
+
 .pl-mono {
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
 }

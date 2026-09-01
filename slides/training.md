@@ -12,7 +12,7 @@ weight slightly when you are wrong. Repeat a few trillion times.
 > Result: something that answers instead of continuing. This is the step that
 > turned a text predictor into an assistant.
 
-**3. Preference tuning (RLHF):** humans rank pairs of answers, and the model is
+**3. Preference tuning (RL):** humans rank pairs of answers, and the model is
 nudged toward the ones people preferred.
 
 > Result: something that is helpful and hard to provoke. Manners, essentially.

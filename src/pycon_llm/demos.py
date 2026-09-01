@@ -172,12 +172,13 @@ def language_cost() -> mo.Html:
                 f"{ratio:.1f}×",
             ]
         )
-    return mo.Html(
-        viz.table(
-            headers=["tokenizer", "English tokens", "Greek tokens", "Greek costs"],
-            rows=rows,
-        )
+    table = viz.table(
+        headers=["tokenizer", "English tokens", "Greek tokens", "Greek costs"],
+        rows=rows,
     )
+    # Bigger type than the shared .pl-table default; this is the one table on
+    # the token_gotchas slide, so it can afford to run larger.
+    return mo.Html(f'<div class="language-cost-table">{table}</div>')
 
 
 # --------------------------------------------------------------------------

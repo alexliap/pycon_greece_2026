@@ -1,3 +1,5 @@
+> **Not an actual slide, more like side noted for previous tokenizer slide.**
+
 # Why this actually matters
 
 **"How many r's are in strawberry?"**
@@ -14,6 +16,3 @@ Greek text gets shredded into small pieces, which means:
 - more tokens for the same sentence → **you pay more per API call**
 - more tokens for the same sentence → **it fills the context window faster**
 - fewer whole-word tokens → **generally worse quality**
-
-> This is not a bug in the maths. It is a bias baked in before the neural
-> network has seen a single number.

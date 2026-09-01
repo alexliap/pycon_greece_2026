@@ -1,6 +1,7 @@
 # One vector per word isn't enough
 
 > I sat on the **river bank**.
+
 > I withdrew cash from the **bank**.
 
 Same token, same ID, same starting vector, completely different meaning.

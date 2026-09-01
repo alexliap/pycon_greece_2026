@@ -167,6 +167,7 @@ def _(demos, mo, read_slide):
     mo.vstack(
         [
             mo.md(read_slide("token_gotchas")),
+            mo.md("<br>"),
             demos.language_cost(),
         ],
         gap=0.8,
@@ -293,9 +294,9 @@ def _(mo, read_slide):
                 graph TD
                     tokens[Token IDs]
                     embed[Embedding]
-                    block1[Attention + Feed-forward]
+                    block1[Attention + Feed-forward / Transformer]
                     blockn[... x N blocks]
-                    logits[Logits: one score per token]
+                    logits[LM Head -> Logits: one score per token]
 
                     tokens --> embed
                     embed --> block1
@@ -410,11 +411,11 @@ def _(mo, read_slide):
                     corpus[Trillions of tokens]
                     base[Base model: predicts text]
                     sft[Instruction tuned: answers questions]
-                    rlhf[Preference tuned: helpful and safe]
+                    rl[Preference tuned: helpful and safe]
 
-                    corpus -->|pretraining| base
-                    base -->|supervised fine-tuning| sft
-                    sft -->|RLHF| rlhf
+                    corpus -->|Pretraining| base
+                    base -->|Supervised fine-tuning| sft
+                    sft -->|Reinforcement Learning| rl
                 """
             ),
         ],

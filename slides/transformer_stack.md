@@ -3,9 +3,9 @@
 Stack that block a few dozen times and you have a transformer:
 
 - **Embed:** every token becomes a vector
-- **Block × N:** attention (words look at each other), then a small feed-forward
+- **Transformer × N:** attention (words look at each other), then a small feed-forward
   network (each word thinks on its own). Repeat.
-- **Unembed:** turn the final vector into one score per token in the vocabulary
+- **Language Model Head:** turn the final vector into one score per token in the vocabulary
 
 Those last scores are called **logits**: one number for every token the model
 knows, saying how good a next token it would be.
