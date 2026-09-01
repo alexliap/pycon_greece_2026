@@ -1,28 +1,20 @@
 """Simulated attention patterns.
 
-There is no trained model here. Instead each "head" is a hand-written rule that
-reproduces a pattern people have actually found inside real transformers:
+There is no trained model here. Instead, one hand-written rule reproduces a
+head behaviour people have actually found inside real transformers: a word
+attends back to whatever earlier word it relates to, whether that relation is
+an explicit reference (a pronoun back to its noun), literal repetition, or
+nearby meaning in the toy embedding space. Everything else stays quiet, so
+whatever lights up is a real relationship, not noise.
 
-* ``previous``   -- look at the word immediately before you
-* ``sink``       -- dump probability on the first token (the famous attention sink)
-* ``reference``  -- resolve a pronoun back to the noun it refers to
-* ``similar``    -- attend to words with related meaning
-
-Every head is causal (you can only look backwards, never forwards) and every row
-sums to 1, exactly as in the real thing. That constraint is the point of the
-slide: it is *why* a language model can only ever predict the next token.
+The matrix is causal (you can only look backwards, never forwards) and every
+row sums to 1, exactly as in the real thing. That constraint is the point of
+the slide: it is *why* a language model can only ever predict the next token.
 """
 
 from __future__ import annotations
 
 import numpy as np
-
-HEADS: dict[str, str] = {
-    "previous": "Previous token: 'what did I just read?'",
-    "sink": "Attention sink: parks probability on the first token",
-    "reference": "Reference: links a pronoun back to its noun",
-    "similar": "Meaning: looks for related words",
-}
 
 # Sentences chosen because the interesting link is visible to the naked eye.
 # ``links`` maps a word index to the earlier index it should refer to.
@@ -34,7 +26,7 @@ SENTENCES: dict[str, dict[str, object]] = {
     },
     "The trophy did not fit in the suitcase because it was too small": {
         "links": {9: 7},  # "it" -> "suitcase"
-        "note": "Same sentence, one word changed, and the reference head has to flip. No grammar rule gets you there, only meaning.",
+        "note": "Same sentence, one word changed, and the link flips to the suitcase. No grammar rule gets you there, only meaning.",
     },
     #        0     1    2    3       4   5        6        7    8    9
     "Maria gave her ticket to Giorgos because she had two": {
@@ -49,13 +41,11 @@ SENTENCES: dict[str, dict[str, object]] = {
     #        0     1     2    3     4   5   6     7    8   9
     "Maria drank her coffee and ate her bread in Athens": {
         "links": {2: 0, 6: 0},  # both "her" -> "Maria"
-        "note": "Try the **meaning** head here: *bread* reaches back to *coffee*, and the second *her* finds the first.",
+        "note": "Two relationships light up at once: *her* reaches back to *Maria* by reference, and *bread* reaches back to *coffee* by meaning alone.",
     },
 }
 
 DEFAULT_SENTENCE = "The trophy did not fit in the suitcase because it was too big"
-
-NUM_LAYERS = 4
 
 
 def tokenize(sentence: str) -> list[str]:
@@ -73,42 +63,20 @@ def _causal_normalise(scores: np.ndarray) -> np.ndarray:
     return scores / scores.sum(axis=1, keepdims=True)
 
 
-def _previous_head(n: int) -> np.ndarray:
-    scores = np.eye(n) * 0.2
-    scores += np.eye(n, k=-1) * 1.0
-    scores += np.eye(n, k=-2) * 0.25
-    scores[:, 0] += 0.1
-    return scores
+def _relation_scores(tokens: list[str], links: dict[int, int]) -> np.ndarray:
+    """Score how directly each word relates to an earlier one.
 
-
-def _sink_head(n: int) -> np.ndarray:
-    scores = np.zeros((n, n))
-    scores[:, 0] = 1.0
-    scores += np.eye(n) * 0.35
-    scores += np.eye(n, k=-1) * 0.15
-    return scores
-
-
-def _reference_head(tokens: list[str], links: dict[int, int]) -> np.ndarray:
-    n = len(tokens)
-    scores = np.eye(n) * 0.5 + np.full((n, n), 0.05)
-    for source, target in links.items():
-        if source < n and target < n:
-            scores[source, target] += 2.5
-    return scores
-
-
-def _similar_head(tokens: list[str]) -> np.ndarray:
-    """Attend to words that share meaning.
-
-    Two sources of "meaning": the toy embedding space for words we have vectors
-    for, and plain repetition for everything else -- attending to an earlier
-    copy of the same word is a real and very common head behaviour.
+    Three sources of relation, all real head behaviours found in trained
+    models: an explicit reference link (a pronoun back to its noun), literal
+    repetition, and nearby meaning in the toy embedding space. The self and
+    baseline terms are kept deliberately low, so a word with no real
+    relationship to anything earlier just stays quiet instead of defaulting
+    to a distracting diagonal.
     """
     from . import embeddings
 
     n = len(tokens)
-    scores = np.eye(n) * 0.3 + np.full((n, n), 0.02)
+    scores = np.eye(n) * 0.12 + np.full((n, n), 0.01)
     words = [tok.lower().strip(".,!?;:") for tok in tokens]
     known = {
         i: embeddings.vector(word)
@@ -125,42 +93,27 @@ def _similar_head(tokens: list[str]) -> np.ndarray:
             elif i in known and j in known:
                 distance = float(np.linalg.norm(known[i] - known[j]))
                 scores[i, j] += 1.5 * float(np.exp(-distance / scale))
+    for source, target in links.items():
+        if source < n and target < n:
+            scores[source, target] += 2.5
     return scores
 
 
-def attention(sentence: str, head: str = "previous", layer: int = 0) -> np.ndarray:
-    """A causal, row-normalised attention matrix for ``sentence``.
-
-    ``layer`` sharpens the pattern: early layers are diffuse, later layers are
-    confident. That mirrors what happens in a real network, and gives the slider
-    on the slide something honest to show.
-    """
+def attention(sentence: str) -> np.ndarray:
+    """A causal, row-normalised attention matrix for ``sentence``."""
     tokens = tokenize(sentence)
     n = len(tokens)
     if n == 0:
         return np.zeros((0, 0))
 
-    if head == "previous":
-        scores = _previous_head(n)
-    elif head == "sink":
-        scores = _sink_head(n)
-    elif head == "reference":
-        links = SENTENCES.get(sentence, {}).get("links", {})
-        scores = _reference_head(tokens, links)  # type: ignore[arg-type]
-    elif head == "similar":
-        scores = _similar_head(tokens)
-    else:
-        raise ValueError(f"Unknown head {head!r}. Choose one of: {', '.join(HEADS)}")
-
-    # Deeper layer -> sharper distribution, via a temperature on the scores.
-    sharpness = 1.0 + 0.9 * layer
-    return _causal_normalise(np.power(scores, sharpness))
+    links = SENTENCES.get(sentence, {}).get("links", {})
+    return _causal_normalise(_relation_scores(tokens, links))  # type: ignore[arg-type]
 
 
-def strongest_links(sentence: str, head: str, layer: int = 0) -> list[tuple[str, str, float]]:
+def strongest_links(sentence: str) -> list[tuple[str, str, float]]:
     """``(from_word, to_word, weight)`` for each row's top attention, skipping self-loops."""
     tokens = tokenize(sentence)
-    weights = attention(sentence, head, layer)
+    weights = attention(sentence)
     out = []
     for i in range(1, len(tokens)):
         row = weights[i].copy()

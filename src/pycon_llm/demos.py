@@ -254,10 +254,10 @@ def analogy_panel(a: str, b: str, c: str) -> mo.Html:
 # --------------------------------------------------------------------------
 
 
-def attention_panel(sentence: str, head: str, layer: int, show_values: bool) -> mo.Html:
-    """The attention heatmap, plus the strongest link found in each row."""
+def attention_panel(sentence: str, show_values: bool) -> mo.Html:
+    """The attention heatmap: who each word looks at."""
     tokens = attn.tokenize(sentence)
-    matrix = attn.attention(sentence, head, layer).tolist()
+    matrix = attn.attention(sentence).tolist()
 
     chart = viz.heatmap(
         matrix,
@@ -267,34 +267,15 @@ def attention_panel(sentence: str, head: str, layer: int, show_values: bool) -> 
         title="Row = the word doing the looking · Column = the word being looked at",
     )
 
-    links = attn.strongest_links(sentence, head, layer)
-    rows = [[source, "→", target, f"{weight:.2f}"] for source, target, weight in links]
-
     note = attn.SENTENCES.get(sentence, {}).get("note", "")
-    description = attn.HEADS.get(head, "")
 
     return mo.vstack(
         [
-            mo.md(f"**{description}**" + (f"  \n{note}" if note else "")),
-            mo.hstack(
-                [
-                    mo.Html(chart),
-                    mo.vstack(
-                        [
-                            mo.md("**Strongest link per word**"),
-                            mo.Html(
-                                viz.table(
-                                    headers=["word", "", "looks at", "weight"],
-                                    rows=rows,
-                                )
-                            ),
-                        ]
-                    ),
-                ],
-                widths=[2.2, 1.0],
-                gap=1.5,
-                align="start",
+            mo.md(
+                "**Words that relate to an earlier word light up. "
+                "Everything else stays quiet.**" + (f"  \n{note}" if note else "")
             ),
+            mo.Html(chart),
             mo.Html(
                 viz.note(
                     "Hatched cells are <b>masked</b>: when predicting a word the model "

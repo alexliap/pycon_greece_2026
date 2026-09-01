@@ -17,6 +17,8 @@ from html import escape
 # background, which is exactly what "near zero" should look like.
 _HEAT_MIN_ALPHA = 0.04
 _HEAT_TEXT_FLIP = 0.55
+_HEAT_FONT_MIN = 0.62
+_HEAT_FONT_MAX = 1.2
 
 
 def wrap(inner: str) -> str:
@@ -135,9 +137,13 @@ def heatmap(
             alpha = _HEAT_MIN_ALPHA + (1.0 - _HEAT_MIN_ALPHA) * value
             ink = "#fff" if value >= _HEAT_TEXT_FLIP else "var(--text-primary)"
             text = f"{value:.2f}"[1:] if show_values and value >= 0.01 else ""
+            # Bigger type for a bigger weight: the word being looked at hardest
+            # should read as the biggest number, not just the darkest cell.
+            font_size = _HEAT_FONT_MIN + (_HEAT_FONT_MAX - _HEAT_FONT_MIN) * value
             cells.append(
                 f'<div class="pl-heat-cell" style="background:rgba(var(--heat-hue),'
-                f'{alpha:.3f});color:{ink}" title="{escape(tip)}">{text}</div>'
+                f'{alpha:.3f});color:{ink};font-size:{font_size:.2f}rem" '
+                f'title="{escape(tip)}">{text}</div>'
             )
 
     heading = f'<p class="pl-title">{escape(title)}</p>' if title else ""

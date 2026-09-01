@@ -255,7 +255,7 @@ body.dark .pl,
 }
 
 .pl-heat-cell {
-  min-width: 2.1rem;
+  min-width: 5.0rem;
   height: 2.1rem;
   display: flex;
   align-items: center;

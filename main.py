@@ -13,7 +13,7 @@ def _():
     import marimo as mo
 
     from pycon_llm import demos
-    from pycon_llm.attention import HEADS, SENTENCES
+    from pycon_llm.attention import SENTENCES
     from pycon_llm.bpe import DEFAULT_CORPUS, MAX_MERGES
     from pycon_llm.common import read_slide
     from pycon_llm.embeddings import ANALOGIES
@@ -28,7 +28,6 @@ def _():
         DEFAULT_PROMPTS,
         ENCODINGS,
         EXAMPLE,
-        HEADS,
         MAX_MERGES,
         SENTENCES,
         demos,
@@ -299,24 +298,16 @@ def _(mo, read_slide):
 
 
 @app.cell
-def _(HEADS, SENTENCES, mo):
+def _(SENTENCES, mo):
     attn_sentence = mo.ui.dropdown(
         options=list(SENTENCES), value=next(iter(SENTENCES)), label="Sentence"
     )
-    attn_head = mo.ui.dropdown(
-        options={label: name for name, label in HEADS.items()},
-        value=HEADS["reference"],
-        label="Head",
-    )
-    attn_layer = mo.ui.slider(start=0, stop=3, value=2, label="Layer", show_value=True)
     attn_values = mo.ui.checkbox(value=False, label="Show numbers")
-    return attn_head, attn_layer, attn_sentence, attn_values
+    return attn_sentence, attn_values
 
 
 @app.cell
 def _(
-    attn_head,
-    attn_layer,
     attn_sentence,
     attn_values,
     demos,
@@ -327,15 +318,13 @@ def _(
         [
             mo.md(read_slide("attention_demo")),
             mo.hstack(
-                [attn_sentence, attn_head, attn_layer, attn_values],
+                [attn_sentence, attn_values],
                 justify="start",
                 gap=1.2,
                 wrap=True,
             ),
             demos.attention_panel(
                 attn_sentence.value,
-                attn_head.value,
-                attn_layer.value,
                 attn_values.value,
             ),
         ],
