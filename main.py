@@ -213,7 +213,6 @@ def _(analogy_choice, demos, mo, read_slide):
             analogy_choice,
             demos.analogy_panel(*analogy_choice.value),
         ],
-        gap=0.8,
     )
     return
 

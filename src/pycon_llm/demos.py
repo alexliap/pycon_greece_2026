@@ -6,6 +6,8 @@ file only arranges results on screen, so the demos stay easy to rearrange while
 rehearsing.
 """
 
+from html import escape
+
 import marimo as mo
 
 from . import attention as attn
@@ -201,7 +203,10 @@ def analogy_panel(a: str, b: str, c: str) -> mo.Html:
             else ("neighbour" if other == winner else "")
         )
         points.append((other, x, y, role))
-    points.append((f"{a} − {b} + {c}", float(target[0]), float(target[1]), "target"))
+    # No label: "a − b + c" is already spelled out in the equation above, and
+    # printing it a second time right next to the words it lands among is
+    # usually what tips the chart into overlapping text.
+    points.append(("", float(target[0]), float(target[1]), "target"))
 
     chart = viz.scatter(
         points,
@@ -212,8 +217,18 @@ def analogy_panel(a: str, b: str, c: str) -> mo.Html:
         ],
     )
 
-    answer = mo.md(
-        f"### `{a}` − `{b}` + `{c}` = **`{winner}`**\n\n"
+    # A styled span rather than a markdown heading: h3 is reserved for the
+    # title slide's subtitle size, and reusing it here would drag this demo's
+    # equation up to that same oversized font.
+    equation = mo.Html(
+        viz.wrap(
+            f'<p class="pl-answer">'
+            f"<code>{escape(a)}</code> − <code>{escape(b)}</code> + "
+            f"<code>{escape(c)}</code> = "
+            f"<strong><code>{escape(winner)}</code></strong></p>"
+        )
+    )
+    detail = mo.md(
         f"The arithmetic lands at {tuple(round(float(v), 2) for v in target)}, and "
         f"the closest actual word to that point is **{winner}**."
     )
@@ -223,16 +238,14 @@ def analogy_panel(a: str, b: str, c: str) -> mo.Html:
         rows=[[name, f"{distance:.2f}"] for name, distance in results],
     )
 
-    return mo.vstack(
+    return mo.hstack(
         [
-            answer,
-            mo.hstack(
-                [mo.Html(chart), mo.Html(runners)],
-                widths=[2.0, 0.8],
-                gap=1.5,
-                align="start",
-            ),
-        ]
+            mo.Html(chart),
+            mo.vstack([equation, detail, mo.Html(runners)], gap=0.6),
+        ],
+        widths=[1.3, 1.0],
+        gap=1.5,
+        align="start",
     )
 
 

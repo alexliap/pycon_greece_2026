@@ -148,6 +148,24 @@ def heatmap(
     return wrap(f'{heading}<div class="pl-scroll">{grid}</div>')
 
 
+def _declutter(
+    left: float, top: float, placed: list[tuple[float, float]], min_gap: float = 4.5
+) -> float:
+    """Nudge a point down until it clears whatever was already placed nearby.
+
+    Points routinely land close together in the toy embedding space -- that's
+    the point of the analogy demo -- so overlapping labels are common. The
+    nudge is small and only kicks in on a real collision, so it stays close
+    to the true coordinates while keeping the text readable.
+    """
+    while any(
+        abs(left - other_left) < min_gap and abs(top - other_top) < min_gap
+        for other_left, other_top in placed
+    ):
+        top += min_gap
+    return top
+
+
 def scatter(
     points: list[tuple[str, float, float, str]],
     legend: list[tuple[str, str]] | None = None,
@@ -171,10 +189,13 @@ def scatter(
     y_span = (y_max - y_min) or 1.0
 
     dots = []
+    placed: list[tuple[float, float]] = []
     for label, x, y, role in points:
         left = (x - x_min) / x_span * 100.0
         # SVG/CSS y grows downward; flip so the maths matches the picture.
         top = (1.0 - (y - y_min) / y_span) * 100.0
+        top = _declutter(left, top, placed)
+        placed.append((left, top))
         cls = f" is-{role}" if role else ""
         dots.append(
             f'<div class="pl-dot{cls}" style="left:{left:.2f}%;top:{top:.2f}%">'
