@@ -324,7 +324,6 @@ def next_token_panel(
             ("temperature", f"{temperature:.2f}", "accent"),
             ("tokens kept", f"{len(survivors)}", ""),
             ("of vocabulary", f"{len(model.vocab)}", ""),
-            ("uncertainty (bits)", f"{sampling.entropy(filtered):.2f}", "warn"),
         ]
     )
 

@@ -98,16 +98,19 @@ class ToyLM:
 
     counts: dict[tuple[str, ...], Counter[str]]
     vocab: tuple[str, ...]
+    unigram: Counter[str]
 
     @classmethod
     def train(cls, text: str = TRAINING_TEXT) -> "ToyLM":
         counts: dict[tuple[str, ...], Counter[str]] = defaultdict(Counter)
         vocab: set[str] = set()
+        unigram: Counter[str] = Counter()
         for line in text.strip().splitlines():
             words = re.findall(r"[\w']+", line.lower())
             if not words:
                 continue
             vocab.update(words)
+            unigram.update(words)
             padded = words + [END]
             for i, word in enumerate(padded):
                 if i >= 1:
@@ -115,7 +118,7 @@ class ToyLM:
                 if i >= 2:
                     counts[(padded[i - 2], padded[i - 1])][word] += 1
         vocab.add(END)
-        return cls(counts=dict(counts), vocab=tuple(sorted(vocab)))
+        return cls(counts=dict(counts), vocab=tuple(sorted(vocab)), unigram=unigram)
 
     def context_used(self, context: list[str]) -> tuple[str, ...]:
         """The longest context this model actually has counts for."""
@@ -140,9 +143,19 @@ class ToyLM:
             for tallies in self.counts.values():
                 counts.update(tallies)
         # Smoothing keeps every token reachable so top-p has a real tail to cut.
-        # Kept small: at 0.1 the ~60 unseen tokens between them soak up half the
-        # probability mass and even temperature 0.8 produces nonsense.
-        return np.array([np.log(counts.get(w, 0) + 0.01) for w in self.vocab])
+        # A flat epsilon would make every unseen word equally likely, which
+        # draws as a uniform sliver of bars. Scaling the floor by how common a
+        # word is overall (unigram backoff) keeps the tail varied instead of
+        # flat, the same way a real LM's smoothing does. Kept small: the total
+        # unigram share added tops out around 0.06, so it shapes the tail
+        # without swamping the actual observed counts.
+        total = sum(self.unigram.values()) or 1
+        floor = 0.01 + 0.25 * np.array(
+            [self.unigram.get(w, 0) / total for w in self.vocab]
+        )
+        return np.array(
+            [np.log(counts.get(w, 0) + f) for w, f in zip(self.vocab, floor)]
+        )
 
     def distribution(
         self,
