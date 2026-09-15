@@ -31,7 +31,7 @@ BASE_VOCAB_SIZE = 256
 
 _WORD_RE = re.compile(r"\S+")
 
-MAX_MERGES = 15
+MAX_MERGES = 10
 
 
 @dataclass(frozen=True)
@@ -189,6 +189,4 @@ CORPUS: dict[str, int] = {
     "joking": 2,
 }
 
-DEFAULT_CORPUS = " ".join(
-    word for word, count in CORPUS.items() for _ in range(count)
-)
+DEFAULT_CORPUS = " ".join(word for word, count in CORPUS.items() for _ in range(count))

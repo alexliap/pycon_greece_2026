@@ -283,7 +283,8 @@ def attention_panel(sentence: str, show_values: bool) -> mo.Html:
                     "constraint is the whole reason an LLM predicts forwards."
                 )
             ),
-        ]
+        ],
+        gap=0.4,
     )
 
 

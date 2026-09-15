@@ -17,8 +17,8 @@ from html import escape
 # background, which is exactly what "near zero" should look like.
 _HEAT_MIN_ALPHA = 0.04
 _HEAT_TEXT_FLIP = 0.55
-_HEAT_FONT_MIN = 0.62
-_HEAT_FONT_MAX = 1.2
+_HEAT_FONT_MIN = 0.52
+_HEAT_FONT_MAX = 0.95
 
 
 def wrap(inner: str) -> str:
@@ -200,7 +200,11 @@ def scatter(
         left = (x - x_min) / x_span * 100.0
         # SVG/CSS y grows downward; flip so the maths matches the picture.
         top = (1.0 - (y - y_min) / y_span) * 100.0
-        top = _declutter(left, top, placed)
+        # The analogy target is designed to land exactly on its answer word --
+        # that overlap *is* the point. A small nudge keeps both dots visible
+        # without the usual label-crowding gap shoving it rows away.
+        gap = 1.2 if role == "target" else 4.5
+        top = _declutter(left, top, placed, min_gap=gap)
         placed.append((left, top))
         cls = f" is-{role}" if role else ""
         dots.append(

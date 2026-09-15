@@ -98,31 +98,25 @@ def _(MAX_MERGES, mo):
 
 @app.cell
 def _(DEFAULT_CORPUS, bpe_merges, demos, mo, read_slide):
-    mo.hstack(
+    mo.vstack(
         [
-            mo.md(read_slide("bpe_live")),
-            mo.vstack(
-                [
-                    mo.md(
-                        "Drag the slider and watch it happen:\n\n"
-                        "- `▁` stands for the space byte, so the space really "
-                        "is part of the token\n"
-                        "- The first merges are dull letter pairs. `we` wins, "
-                        "appearing 12 times\n"
-                        "- By merge 4 you have `▁newe`; by merge 10 the whole "
-                        "word `▁newest`\n"
-                        "- Nobody chose those. They fell out of counting."
-                    ),
-                    bpe_merges,
-                    demos.bpe_panel(DEFAULT_CORPUS, bpe_merges.value),
-                ],
-                gap=1.0,
+            mo.md("## Let's train one"),
+            mo.md(
+                "Drag the slider and watch it happen:\n\n"
+                "- `▁` stands for the space byte, so the space really "
+                "is part of the token\n"
+                "- The first merges are dull letter pairs. `we` wins, "
+                "appearing 12 times\n"
+                "- By merge 4 you have `▁newe`; by merge 10 the whole "
+                "word `▁newest`\n"
+                "- Nobody chose those. They fell out of counting."
             ),
+            bpe_merges,
+            demos.bpe_panel(DEFAULT_CORPUS, bpe_merges.value),
         ],
-        widths=[1.0, 1.5],
-        align="center",
-        gap=3,
+        gap=1.0,
     )
+
     return
 
 
@@ -212,6 +206,7 @@ def _(analogy_choice, demos, mo, read_slide):
             analogy_choice,
             demos.analogy_panel(*analogy_choice.value),
         ],
+        gap=0.4,
     )
     return
 
@@ -286,7 +281,7 @@ def _(mo, read_slide):
                         """
                     ),
                 ],
-                gap=2.0,
+                gap=1.0,
             ),
         ],
         align="center",
@@ -328,7 +323,7 @@ def _(
                 attn_values.value,
             ),
         ],
-        gap=0.8,
+        gap=0.5,
     )
     return
 
@@ -523,6 +518,21 @@ def _(mo, read_slide):
 @app.cell
 def _(mo, read_slide):
     mo.md(read_slide("thanks"))
+    return
+
+
+@app.cell
+def _(mo, read_slide):
+    mo.md(read_slide("appendix"))
+    return
+
+
+@app.cell
+def _(mo, read_slide):
+    # Nested under the appendix slide (down arrow): the byte/UTF-8 detail cut
+    # from the live BPE slide for time.
+    # See SUB_SLIDES / FRAGMENTS in scripts/build_layout.py.
+    mo.md(read_slide("appendix_bpe_bytes"))
     return
 
 

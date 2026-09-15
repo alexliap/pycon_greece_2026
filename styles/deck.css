@@ -74,13 +74,13 @@ body.dark .pl,
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--text-secondary);
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.3rem;
 }
 
 .pl-note {
   font-size: 0.85rem;
   color: var(--text-muted);
-  margin-top: 0.5rem;
+  margin-top: 0.35rem;
 }
 
 .pl-answer {
@@ -260,14 +260,14 @@ body.dark .pl,
 }
 
 .pl-heat-cell {
-  min-width: 5.0rem;
-  height: 2.1rem;
+  min-width: 4.5rem;
+  height: 1.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
   font-variant-numeric: tabular-nums;
-  font-size: 0.72rem;
+  font-size: 0.62rem;
 }
 
 .pl-heat-cell.is-masked {
@@ -282,7 +282,7 @@ body.dark .pl,
   display: flex;
   align-items: center;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   color: var(--text-secondary);
   white-space: nowrap;
 }
@@ -297,7 +297,7 @@ body.dark .pl,
   justify-content: center;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  height: 4.6rem;
+  height: 3.4rem;
 }
 
 /* --- scatter ------------------------------------------------------------ */
@@ -601,6 +601,26 @@ body.dark .markdown,
   max-width: 80rem;
 }
 
+/* marimo and the browser both ship paragraph/list/code-block margins sized
+   for a scrolling notebook. On a fixed-height slide those add up fast, so
+   tighten them here rather than per slide. */
+.reveal .slides section .paragraph {
+  margin-block: 0.4rem;
+}
+
+.reveal .slides section ul,
+.reveal .slides section ol {
+  margin: 0.4rem 0;
+}
+
+.reveal .slides section li {
+  margin-block: 0.15rem;
+}
+
+.reveal .slides section pre {
+  margin: 0.5rem 0;
+}
+
 /* marimo's slide view; nudge type up so the back row can read it.
    NOTE: .markdown is `display: contents`, so it generates no box -- only
    inherited properties like font-size take effect here, never width or margin. */
@@ -654,4 +674,28 @@ marimo-mermaid svg {
   width: 100% !important;
   max-width: 100% !important;
   height: auto !important;
+}
+
+/* --- footer --------------------------------------------------------------- */
+
+/* .reveal wraps the whole deck and never re-renders between slides, so a
+   pseudo-element on it reads as a fixed footer on every slide without
+   touching a single main.py cell. */
+.reveal::after {
+  content: "Alexandros Liapatis | October 12, 2026";
+  position: fixed;
+  left: 50%;
+  bottom: 1.2rem;
+  transform: translateX(-50%);
+  font-size: 1.5rem;
+  color: #78776f;
+  z-index: 30;
+  pointer-events: none;
+}
+
+:root[data-theme="dark"] .reveal::after,
+html.dark .reveal::after,
+body.dark .reveal::after,
+.dark .reveal::after {
+  color: #93928a;
 }

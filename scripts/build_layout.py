@@ -34,6 +34,7 @@ SUB_SLIDES: frozenset[str] = frozenset(
         "attention_math",
         "why_nondeterministic",
         "evaluation_caveat",
+        "appendix_bpe_bytes",
     }
 )
 
