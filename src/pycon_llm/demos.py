@@ -303,7 +303,7 @@ def next_token_panel(
     """The probability distribution over the next token, and what the knobs do to it."""
     context = prompt.lower().split()
 
-    raw = model.top_tokens(context, n=14, temperature=temperature)
+    raw = model.top_tokens(context, n=11, temperature=temperature)
     filtered = model.distribution(context, temperature, top_k, top_p)
     survivors = {model.vocab[i] for i in range(len(model.vocab)) if filtered[i] > 0}
 

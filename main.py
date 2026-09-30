@@ -100,7 +100,7 @@ def _(MAX_MERGES, mo):
 def _(DEFAULT_CORPUS, bpe_merges, demos, mo, read_slide):
     mo.vstack(
         [
-            mo.md("## Let's train one"),
+            mo.md(read_slide("bpe_live")),
             mo.md(
                 "Drag the slider and watch it happen:\n\n"
                 "- `▁` stands for the space byte, so the space really "
@@ -148,19 +148,6 @@ def _(demos, mo, read_slide, tok_encoding, tok_text):
             demos.tokenizer_panel(tok_text.value, tok_encoding.value),
             mo.md("**The same text through every generation of tokenizer**"),
             demos.tokenizer_comparison(tok_text.value),
-        ],
-        gap=0.8,
-    )
-    return
-
-
-@app.cell
-def _(demos, mo, read_slide):
-    mo.vstack(
-        [
-            mo.md(read_slide("token_gotchas")),
-            mo.md("<br>"),
-            demos.language_cost(),
         ],
         gap=0.8,
     )
@@ -226,73 +213,6 @@ def _(mo, read_slide):
 
 
 @app.cell
-def _(mo, read_slide):
-    # Nested under the context slide (down arrow), after the attention
-    # fragment. See SUB_SLIDES / FRAGMENTS in scripts/build_layout.py.
-    mo.hstack(
-        [
-            mo.md(read_slide("attention_math")),
-            mo.vstack(
-                [
-                    mo.md("**Attention**"),
-                    mo.mermaid(
-                        """
-                        graph LR
-                            x[Input X]
-                            wq[W_Q]
-                            wk[W_K]
-                            wv[W_V]
-                            q[Q]
-                            k[K]
-                            v[V]
-                            scores["Q · Kᵀ"]
-                            softmax[softmax]
-                            out[Weighted output]
-
-                            x --> wq --> q
-                            x --> wk --> k
-                            x --> wv --> v
-                            q --> scores
-                            k --> scores
-                            scores --> softmax
-                            softmax --> out
-                            v --> out
-                        """
-                    ),
-                    mo.md("**Multi-head attention**"),
-                    mo.mermaid(
-                        """
-                        graph TD
-                            x[Input X]
-                            h1["Head 1: Q,K,V → Attention"]
-                            h2["Head 2: Q,K,V → Attention"]
-                            hdots["..."]
-                            concat[Concat]
-                            wo[W_O]
-                            out[Output]
-
-                            x --> h1
-                            x --> h2
-                            x --> hdots
-                            h1 --> concat
-                            h2 --> concat
-                            hdots --> concat
-                            concat --> wo --> out
-                        """
-                    ),
-                ],
-                gap=1.0,
-            ),
-        ],
-        align="center",
-        wrap=True,
-        gap=2.5,
-        widths=[1.0, 1.3],
-    )
-    return
-
-
-@app.cell
 def _(SENTENCES, mo):
     attn_sentence = mo.ui.dropdown(
         options=list(SENTENCES), value=next(iter(SENTENCES)), label="Sentence"
@@ -324,6 +244,31 @@ def _(
             ),
         ],
         gap=0.5,
+    )
+    return
+
+
+@app.cell
+def _(mo, read_slide):
+    mo.hstack(
+        [
+            mo.md(read_slide("transformer_block")),
+            mo.mermaid(
+                """
+                graph TD
+                    x[Input]
+                    attn[Multi-Head Attention]
+                    ff[Feed-Forward]
+                    out[Output]
+
+                    x --> attn --> ff --> out
+                """
+            ),
+        ],
+        align="center",
+        wrap=True,
+        gap=1.0,
+        widths=[1.6, 1.0],
     )
     return
 
@@ -416,31 +361,11 @@ def _(
 
 @app.cell
 def _(
-    demos,
-    gen_prompt,
-    gen_seed,
-    gen_temperature,
-    gen_top_k,
-    gen_top_p,
     mo,
     read_slide,
-    toy_lm,
 ):
-    mo.vstack(
-        [
-            mo.md(read_slide("why_nondeterministic")),
-            gen_seed,
-            demos.generation_panel(
-                toy_lm,
-                gen_prompt.value,
-                gen_temperature.value,
-                gen_top_k.value,
-                gen_top_p.value,
-                int(gen_seed.value or 0),
-            ),
-        ],
-        gap=0.8,
-    )
+    mo.md(read_slide("why_nondeterministic"))
+
     return
 
 
@@ -474,7 +399,7 @@ def _(mo, read_slide):
 @app.cell
 def _(mo):
     eval_text = mo.ui.text(
-        value="the cat sat on the mat",
+        value="the model reads the text and predicts the next word",
         label="Score this text",
         full_width=True,
     )
@@ -511,12 +436,6 @@ def _(demos, mo, read_slide):
 
 @app.cell
 def _(mo, read_slide):
-    mo.md(read_slide("recap"))
-    return
-
-
-@app.cell
-def _(mo, read_slide):
     mo.md(read_slide("thanks"))
     return
 
@@ -533,6 +452,74 @@ def _(mo, read_slide):
     # from the live BPE slide for time.
     # See SUB_SLIDES / FRAGMENTS in scripts/build_layout.py.
     mo.md(read_slide("appendix_bpe_bytes"))
+    return
+
+
+@app.cell
+def _(mo, read_slide):
+    # Nested under the appendix_bpe_bytes slide (down arrow): the QKV/
+    # multi-head matrix detail cut from the live attention slide for time.
+    # See SUB_SLIDES / FRAGMENTS in scripts/build_layout.py.
+    mo.hstack(
+        [
+            mo.md(read_slide("attention_math")),
+            mo.vstack(
+                [
+                    mo.md("**Attention**"),
+                    mo.mermaid(
+                        """
+                        graph LR
+                            x[Input X]
+                            wq[W_Q]
+                            wk[W_K]
+                            wv[W_V]
+                            q[Q]
+                            k[K]
+                            v[V]
+                            scores["Q · Kᵀ"]
+                            softmax[softmax]
+                            out[Weighted output]
+
+                            x --> wq --> q
+                            x --> wk --> k
+                            x --> wv --> v
+                            q --> scores
+                            k --> scores
+                            scores --> softmax
+                            softmax --> out
+                            v --> out
+                        """
+                    ),
+                    mo.md("**Multi-head attention**"),
+                    mo.mermaid(
+                        """
+                        graph TD
+                            x[Input X]
+                            h1["Head 1: Q,K,V → Attention"]
+                            h2["Head 2: Q,K,V → Attention"]
+                            hdots["..."]
+                            concat[Concat]
+                            wo[W_O]
+                            out[Output]
+
+                            x --> h1
+                            x --> h2
+                            x --> hdots
+                            h1 --> concat
+                            h2 --> concat
+                            hdots --> concat
+                            concat --> wo --> out
+                        """
+                    ),
+                ],
+                gap=1.0,
+            ),
+        ],
+        align="center",
+        wrap=True,
+        gap=2.5,
+        widths=[1.0, 1.3],
+    )
     return
 
 

@@ -155,9 +155,14 @@ def heatmap(
 
 
 def _declutter(
-    left: float, top: float, placed: list[tuple[float, float]], min_gap: float = 4.5
+    left: float,
+    top: float,
+    placed: list[tuple[float, float]],
+    min_gap: float = 4.5,
+    direction: float = 1.0,
 ) -> float:
-    """Nudge a point down until it clears whatever was already placed nearby.
+    """Nudge a point down (or up, with ``direction=-1``) until it clears
+    whatever was already placed nearby.
 
     Points routinely land close together in the toy embedding space -- that's
     the point of the analogy demo -- so overlapping labels are common. The
@@ -168,7 +173,7 @@ def _declutter(
         abs(left - other_left) < min_gap and abs(top - other_top) < min_gap
         for other_left, other_top in placed
     ):
-        top += min_gap
+        top += min_gap * direction
     return top
 
 
@@ -201,10 +206,12 @@ def scatter(
         # SVG/CSS y grows downward; flip so the maths matches the picture.
         top = (1.0 - (y - y_min) / y_span) * 100.0
         # The analogy target is designed to land exactly on its answer word --
-        # that overlap *is* the point. A small nudge keeps both dots visible
-        # without the usual label-crowding gap shoving it rows away.
-        gap = 1.2 if role == "target" else 4.5
-        top = _declutter(left, top, placed, min_gap=gap)
+        # that overlap *is* the point. Nudge it up rather than down so it
+        # clears the answer's own dot and label instead of hiding them.
+        if role == "target":
+            top = _declutter(left, top, placed, min_gap=3.0, direction=-1.0)
+        else:
+            top = _declutter(left, top, placed)
         placed.append((left, top))
         cls = f" is-{role}" if role else ""
         dots.append(
