@@ -246,6 +246,57 @@ body.dark .pl,
   color: var(--text-secondary);
 }
 
+/* --- side formula ------------------------------------------------------- */
+
+/* Resize the formulas here. marimo puts its own font-size on the .markdown
+   element (the 1.12rem rule further down), so the size has to be set on
+   .markdown itself, not inherited from .pl-formula. */
+.pl-formula {
+  --pl-formula-size: 2.0rem;
+  --pl-formula-where-size: 1.2rem;
+  text-align: center;
+}
+
+#slide-container .pl-formula .markdown,
+.slides .pl-formula .markdown {
+  font-size: var(--pl-formula-size);
+}
+
+#slide-container .pl-formula-where .markdown,
+.slides .pl-formula-where .markdown {
+  font-size: var(--pl-formula-where-size);
+}
+
+.pl-formula-where {
+  margin-top: 0.4rem;
+}
+
+/* Roomier prose for text-light slides (qkv, transformer block). Wrap the
+   slide's markdown in <div class="pl-airy">. Tune the three values below. */
+.pl-airy {
+  --pl-airy-line-height: 1.9;
+  --pl-airy-gap: 1.1rem;
+  --pl-airy-item-gap: 0.7rem;
+}
+
+#slide-container .pl-airy .markdown,
+.slides .pl-airy .markdown {
+  line-height: var(--pl-airy-line-height);
+}
+
+.reveal .slides section .pl-airy .paragraph {
+  margin-block: var(--pl-airy-gap);
+}
+
+.reveal .slides section .pl-airy ul,
+.reveal .slides section .pl-airy ol {
+  margin: var(--pl-airy-gap) 0;
+}
+
+.reveal .slides section .pl-airy li {
+  margin-block: var(--pl-airy-item-gap);
+}
+
 /* --- heatmap ------------------------------------------------------------ */
 
 .pl-heat {
@@ -697,5 +748,53 @@ marimo-mermaid svg {
 html.dark .reveal::after,
 body.dark .reveal::after,
 .dark .reveal::after {
+  color: #93928a;
+}
+
+/* --- slide numbers --------------------------------------------------------- */
+
+/* marimo's layout.json only forwards "transition" and "verticalAlign" to
+   Reveal.initialize(), not slideNumber, so reveal.js's own numbering option
+   never reaches it. A nested CSS counter on the <section> elements reproduces
+   it without any JS: reveal.js already shows only the .present section
+   (everything else is display:none), so exactly one number is ever visible. */
+.reveal .slides {
+  counter-reset: pl-slide;
+}
+
+.reveal .slides>section {
+  counter-increment: pl-slide;
+  counter-reset: pl-subslide;
+}
+
+.reveal .slides>section>section {
+  counter-increment: pl-subslide;
+}
+
+/* A slide with sub-slides also keeps its stack wrapper .present, so only
+   number the leaf section that actually holds content -- otherwise a
+   sub-slide would show two numbers at once. */
+.reveal .slides>section:not(:has(> section))::after,
+.reveal .slides>section>section::after {
+  position: absolute;
+  left: 1.25rem;
+  bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: #78776f;
+  pointer-events: none;
+}
+
+.reveal .slides>section:not(:has(> section))::after {
+  content: counter(pl-slide);
+}
+
+.reveal .slides>section>section::after {
+  content: counter(pl-slide) "." counter(pl-subslide);
+}
+
+:root[data-theme="dark"] .reveal .slides section::after,
+html.dark .reveal .slides section::after,
+body.dark .reveal .slides section::after,
+.dark .reveal .slides section::after {
   color: #93928a;
 }

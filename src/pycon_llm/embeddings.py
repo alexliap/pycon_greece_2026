@@ -85,8 +85,6 @@ WORDS: tuple[str, ...] = tuple(VECTORS)
 
 # Analogies that work in this space, offered as ready-made demo buttons.
 ANALOGIES: tuple[tuple[str, str, str], ...] = (
-    ("king", "man", "woman"),
-    ("queen", "woman", "man"),
     ("athens", "greece", "france"),
     ("paris", "france", "italy"),
     ("kitten", "cat", "dog"),
@@ -136,7 +134,7 @@ def nearest(word: str, k: int = 5, exclude: tuple[str, ...] = ()) -> list[tuple[
 
 
 def analogy(a: str, b: str, c: str, k: int = 3) -> list[tuple[str, float]]:
-    """``a - b + c``: "king is to man as ??? is to woman"."""
+    """``a - b + c``: "athens is to greece as ??? is to france"."""
     target = vector(a) - vector(b) + vector(c)
     skip = {a, b, c}
     scored = [

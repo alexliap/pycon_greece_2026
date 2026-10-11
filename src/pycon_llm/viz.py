@@ -136,7 +136,10 @@ def heatmap(
                 continue
             alpha = _HEAT_MIN_ALPHA + (1.0 - _HEAT_MIN_ALPHA) * value
             ink = "#fff" if value >= _HEAT_TEXT_FLIP else "var(--text-primary)"
-            text = f"{value:.2f}"[1:] if show_values and value >= 0.01 else ""
+            text = ""
+            if show_values and value >= 0.01:
+                rounded = f"{value:.2f}"
+                text = rounded if rounded.startswith("1") else rounded[1:]
             # Bigger type for a bigger weight: the word being looked at hardest
             # should read as the biggest number, not just the darkest cell.
             font_size = _HEAT_FONT_MIN + (_HEAT_FONT_MAX - _HEAT_FONT_MIN) * value

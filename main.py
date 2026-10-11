@@ -90,9 +90,7 @@ def _(mo, read_slide):
 
 @app.cell
 def _(MAX_MERGES, mo):
-    bpe_merges = mo.ui.slider(
-        start=0, stop=MAX_MERGES, value=0, label="Merges", show_value=True
-    )
+    bpe_merges = mo.ui.number(start=0, stop=MAX_MERGES, step=1, value=0, label="Merges")
     return (bpe_merges,)
 
 
@@ -179,7 +177,7 @@ def _(mo, read_slide):
 def _(ANALOGIES, mo):
     analogy_choice = mo.ui.dropdown(
         options={f"{a} - {b} + {c}": (a, b, c) for a, b, c in ANALOGIES},
-        value="king - man + woman",
+        value="athens - greece + france",
         label="Try",
     )
     return (analogy_choice,)
@@ -213,12 +211,77 @@ def _(mo, read_slide):
 
 
 @app.cell
+def _(mo, read_slide):
+    mo.hstack(
+        [
+            mo.Html(
+                '<div class="pl-airy">' + mo.md(read_slide("qkv")).text + "</div>"
+            ),
+            mo.mermaid(
+                """
+                graph LR
+                    x[Input X]
+                    q[Query]
+                    k[Key]
+                    v[Value]
+
+                    x --> q
+                    x --> k
+                    x --> v
+                """
+            ),
+        ],
+        align="center",
+        wrap=True,
+        gap=1.0,
+        widths=[1.6, 1.0],
+    )
+    return
+
+
+@app.cell
 def _(SENTENCES, mo):
     attn_sentence = mo.ui.dropdown(
         options=list(SENTENCES), value=next(iter(SENTENCES)), label="Sentence"
     )
     attn_values = mo.ui.checkbox(value=False, label="Show numbers")
     return attn_sentence, attn_values
+
+
+@app.cell
+def _(
+    attn_sentence,
+    attn_values,
+    demos,
+    mo,
+    read_slide,
+):
+    mo.vstack(
+        [
+            mo.md(read_slide("attention_scores")),
+            mo.hstack(
+                [attn_sentence, attn_values],
+                justify="start",
+                gap=1.2,
+                wrap=True,
+            ),
+            demos.attention_panel(
+                attn_sentence.value,
+                attn_values.value,
+                masked=False,
+                side=mo.Html(
+                    '<div class="pl-formula">'
+                    + mo.md(
+                        r"$$\text{scores} = \operatorname{softmax}\!\left("
+                        r"\dfrac{QK^{\top}}{\sqrt{d_k}}\right)$$"
+                    ).text
+                    + "</div>"
+                ),
+            ),
+        ],
+        gap=0.5,
+    )
+    return
 
 
 @app.cell
@@ -241,6 +304,16 @@ def _(
             demos.attention_panel(
                 attn_sentence.value,
                 attn_values.value,
+                side=mo.Html(
+                    '<div class="pl-formula">'
+                    + mo.md(
+                        r"$$\text{scores} = \operatorname{softmax}\!\left("
+                        r"\dfrac{QK^{\top}}{\sqrt{d_k}} + M\right)$$"
+                    ).text
+                    + '<div class="pl-formula-where">'
+                    + mo.md(r"where $M_{ij} = -\infty$ if $j > i$, else $0$").text
+                    + "</div></div>"
+                ),
             ),
         ],
         gap=0.5,
@@ -250,9 +323,102 @@ def _(
 
 @app.cell
 def _(mo, read_slide):
+    mo.vstack(
+        [
+            mo.md(read_slide("attention_output")),
+            mo.Html(
+                '<div class="pl-formula">'
+                + mo.md(
+                    r"$$\text{Attention}(Q,K,V) = \operatorname{softmax}\!\left("
+                    r"\dfrac{QK^{\top}}{\sqrt{d_k}} + M\right)V$$"
+                ).text
+                + "</div>"
+            ),
+        ],
+        gap=1.0,
+    )
+    return
+
+
+@app.cell
+def _(mo, read_slide):
     mo.hstack(
         [
-            mo.md(read_slide("transformer_block")),
+            mo.md(read_slide("attention_heads")),
+            mo.mermaid(
+                """
+                graph TD
+                    x[Input X]
+                    h1["Head 1: Q,K,V → Attention"]
+                    h2["Head 2: Q,K,V → Attention"]
+                    hdots["..."]
+                    concat[Concat]
+                    wo[W_O]
+                    out[Output]
+
+                    x --> h1
+                    x --> h2
+                    x --> hdots
+                    h1 --> concat
+                    h2 --> concat
+                    hdots --> concat
+                    concat --> wo --> out
+                """
+            ),
+        ],
+        align="center",
+        wrap=True,
+        gap=1.0,
+        widths=[1.6, 1.0],
+    )
+    return
+
+
+@app.cell
+def _(mo, read_slide):
+    mo.hstack(
+        [
+            mo.vstack(
+                [
+                    mo.md(read_slide("feed_forward")),
+                    mo.Html(
+                        '<div class="pl-formula">'
+                        + mo.md(
+                            r"$$\text{FFN}(x) = \text{activation}(xW_1 + b_1)\,W_2 + b_2$$"
+                        ).text
+                        + "</div>"
+                    ),
+                ],
+                gap=1.0,
+            ),
+            mo.mermaid(
+                """
+                graph TD
+                    x[Word vector x]
+                    w1[Matrix W1]
+                    act[Activation]
+                    w2[Matrix W2]
+                    out[New word vector]
+
+                    x --> w1 --> act --> w2 --> out
+                """
+            ),
+        ],
+        align="center",
+        wrap=True,
+        gap=1.0,
+        widths=[1.6, 1.0],
+    )
+    return
+
+
+@app.cell
+def _(mo, read_slide):
+    mo.hstack(
+        [
+            mo.Html(
+                '<div class="pl-airy">' + mo.md(read_slide("transformer_block")).text + "</div>"
+            ),
             mo.mermaid(
                 """
                 graph TD
@@ -316,14 +482,8 @@ def _(DEFAULT_PROMPTS, mo):
     gen_temperature = mo.ui.slider(
         start=0.1, stop=2.0, step=0.1, value=1.0, label="Temperature", show_value=True
     )
-    gen_top_k = mo.ui.slider(
-        start=0, stop=20, value=0, label="Top-k (0 = off)", show_value=True
-    )
-    gen_top_p = mo.ui.slider(
-        start=0.1, stop=1.0, step=0.05, value=1.0, label="Top-p", show_value=True
-    )
     gen_seed = mo.ui.number(start=0, stop=999, value=1, label="Seed")
-    return gen_prompt, gen_seed, gen_temperature, gen_top_k, gen_top_p
+    return gen_prompt, gen_seed, gen_temperature
 
 
 @app.cell
@@ -331,8 +491,6 @@ def _(
     demos,
     gen_prompt,
     gen_temperature,
-    gen_top_k,
-    gen_top_p,
     mo,
     read_slide,
     toy_lm,
@@ -341,7 +499,7 @@ def _(
         [
             mo.md(read_slide("sampling_demo")),
             mo.hstack(
-                [gen_prompt, gen_temperature, gen_top_k, gen_top_p],
+                [gen_prompt, gen_temperature],
                 justify="start",
                 gap=1.2,
                 wrap=True,
@@ -350,8 +508,13 @@ def _(
                 toy_lm,
                 gen_prompt.value,
                 gen_temperature.value,
-                gen_top_k.value,
-                gen_top_p.value,
+                side=mo.Html(
+                    '<div class="pl-formula">'
+                    + mo.md(
+                        r"$$\operatorname{softmax}\!\left(\dfrac{\text{logits}}{T}\right)$$"
+                    ).text
+                    + "</div>"
+                ),
             ),
         ],
         gap=0.8,

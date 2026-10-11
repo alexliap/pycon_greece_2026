@@ -1,15 +1,7 @@
-# The knobs you already pay for
+# What the model outputs
 
-These are the parameters in every LLM API, and this is all they do:
+One score per token in the vocabulary, called a **logit**. A softmax turns the
+scores into the probabilities below.
 
-- **temperature:** divide the scores before the softmax. Low = confident and
-  repetitive. High = surprising, then incoherent.
-
-```python
-logits = logits / T
-```
-- **top-k:** only ever consider the *k* best tokens
-- **top-p:** keep the smallest set of tokens worth *p* of the probability, then
-  ignore the rest
-
-Grey bars are the tokens your settings just threw away.
+**Temperature** divides the logits before the softmax. Low is confident and
+repetitive, high is surprising, then incoherent.

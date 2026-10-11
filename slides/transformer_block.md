@@ -1,17 +1,12 @@
-# Transformer
+# The transformer block
 
-<br>
-<br>
+Put the two together and you have the building block of modern AI models.
 
-The building block of modern AI models.
+- **Attention*:** words look at each other and mix in what they find
+- **Feed-forward:** each word then computes something with what it gathered
 
-They consist of one Attention module*, and two linear projections (feed-forward network).
-
-```python
-Attention(Q, K, V) = softmax(Q @ K.T / sqrt(d_k)) @ V
-
-FFN(x) = activation(x @ W1 + b1) @ W2 + b2
-```
+Attention decides what to look at. The feed-forward layer is where the model
+does something with it.
 
 <br>
 

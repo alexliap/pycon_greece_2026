@@ -53,13 +53,15 @@ def tokenize(sentence: str) -> list[str]:
     return sentence.split()
 
 
-def _causal_normalise(scores: np.ndarray) -> np.ndarray:
-    """Mask out the future, then make every row a probability distribution."""
+def _normalise(scores: np.ndarray, causal: bool) -> np.ndarray:
+    """Make every row a probability distribution, hiding the future if ``causal``."""
     n = scores.shape[0]
-    causal = np.tril(np.ones((n, n), dtype=bool))
+    visible = np.ones((n, n), dtype=bool)
+    if causal:
+        visible = np.tril(visible)
     # Smooth first, mask second, so masked positions end up exactly 0.0 rather
     # than a small epsilon -- "cannot see the future" should mean *cannot*.
-    scores = np.where(causal, np.clip(scores, 0.0, None) + 1e-6, 0.0)
+    scores = np.where(visible, np.clip(scores, 0.0, None) + 1e-6, 0.0)
     return scores / scores.sum(axis=1, keepdims=True)
 
 
@@ -99,15 +101,15 @@ def _relation_scores(tokens: list[str], links: dict[int, int]) -> np.ndarray:
     return scores
 
 
-def attention(sentence: str) -> np.ndarray:
-    """A causal, row-normalised attention matrix for ``sentence``."""
+def attention(sentence: str, causal: bool = True) -> np.ndarray:
+    """A row-normalised attention matrix for ``sentence``, causal unless told otherwise."""
     tokens = tokenize(sentence)
     n = len(tokens)
     if n == 0:
         return np.zeros((0, 0))
 
     links = SENTENCES.get(sentence, {}).get("links", {})
-    return _causal_normalise(_relation_scores(tokens, links))  # type: ignore[arg-type]
+    return _normalise(_relation_scores(tokens, links), causal)  # type: ignore[arg-type]
 
 
 def strongest_links(sentence: str) -> list[tuple[str, str, float]]:

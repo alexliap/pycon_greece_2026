@@ -254,10 +254,19 @@ def analogy_panel(a: str, b: str, c: str) -> mo.Html:
 # --------------------------------------------------------------------------
 
 
-def attention_panel(sentence: str, show_values: bool) -> mo.Html:
-    """The attention heatmap: who each word looks at."""
+def attention_panel(
+    sentence: str,
+    show_values: bool,
+    side: mo.Html | None = None,
+    masked: bool = True,
+) -> mo.Html:
+    """The attention heatmap: who each word looks at.
+
+    ``masked`` hides the future (the hatched upper triangle); off, every word is
+    scored against every other. ``side`` is centred right of the matrix.
+    """
     tokens = attn.tokenize(sentence)
-    matrix = attn.attention(sentence).tolist()
+    matrix = attn.attention(sentence, causal=masked).tolist()
 
     chart = viz.heatmap(
         matrix,
@@ -269,21 +278,34 @@ def attention_panel(sentence: str, show_values: bool) -> mo.Html:
 
     note = attn.SENTENCES.get(sentence, {}).get("note", "")
 
+    matrix_row = (
+        mo.hstack([mo.Html(chart), side], widths=[1.9, 1], align="center", gap=0)
+        if side is not None
+        else mo.Html(chart)
+    )
+
+    if masked:
+        heading = (
+            "**Words that relate to an earlier word light up. "
+            "Everything else stays quiet.**" + (f"  \n{note}" if note else "")
+        )
+        footnote = (
+            "Hatched cells are <b>masked</b>: when predicting a word the model "
+            "is structurally forbidden from seeing anything to its right. That "
+            "constraint is the whole reason an LLM predicts forwards."
+        )
+    else:
+        heading = (
+            "**Every word is scored against every other word, "
+            "including the ones that come after it.**"
+        )
+        footnote = (
+            "Nothing is hidden yet. But when predicting the next word, the words "
+            "to the right do not exist, so the model cannot be allowed to use them."
+        )
+
     return mo.vstack(
-        [
-            mo.md(
-                "**Words that relate to an earlier word light up. "
-                "Everything else stays quiet.**" + (f"  \n{note}" if note else "")
-            ),
-            mo.Html(chart),
-            mo.Html(
-                viz.note(
-                    "Hatched cells are <b>masked</b>: when predicting a word the model "
-                    "is structurally forbidden from seeing anything to its right. That "
-                    "constraint is the whole reason an LLM predicts forwards."
-                )
-            ),
-        ],
+        [mo.md(heading), matrix_row, mo.Html(viz.note(footnote))],
         gap=0.4,
     )
 
@@ -297,44 +319,31 @@ def next_token_panel(
     model: sampling.ToyLM,
     prompt: str,
     temperature: float,
-    top_k: int,
-    top_p: float,
+    side: mo.Html | None = None,
 ) -> mo.Html:
-    """The probability distribution over the next token, and what the knobs do to it."""
+    """The probability distribution over the next token at a given temperature.
+
+    ``side`` is centred in the space to the right of the bars.
+    """
     context = prompt.lower().split()
 
     raw = model.top_tokens(context, n=11, temperature=temperature)
-    filtered = model.distribution(context, temperature, top_k, top_p)
-    survivors = {model.vocab[i] for i in range(len(model.vocab)) if filtered[i] > 0}
-
-    chart = viz.bars(
-        raw,
-        kept=survivors,
-        title=f"P(next token | “{prompt}”)",
-    )
+    chart = mo.Html(viz.bars(raw, title=f"P(next token | “{prompt}”)"))
 
     used = model.context_used(context)
     context_note = (
-        f"matched on the last {len(used)} word(s): <code>{' '.join(used)}</code>"
+        f"Matched on the last {len(used)} word(s): <code>{' '.join(used)}</code>"
         if used
-        else "no match, falling back to overall word frequency"
+        else "No match, falling back to overall word frequency"
     )
 
-    summary = viz.stats(
-        [
-            ("temperature", f"{temperature:.2f}", "accent"),
-            ("tokens kept", f"{len(survivors)}", ""),
-            ("of vocabulary", f"{len(model.vocab)}", ""),
-        ]
+    bars_row = (
+        mo.hstack([chart, side], widths=[1.9, 1], align="center", gap=0)
+        if side is not None
+        else chart
     )
 
-    return mo.vstack(
-        [
-            mo.Html(summary),
-            mo.Html(chart),
-            mo.Html(viz.note(f"Grey bars were cut by top-k / top-p, {context_note}.")),
-        ]
-    )
+    return mo.vstack([bars_row, mo.Html(viz.note(f"{context_note}."))])
 
 
 def generation_panel(
